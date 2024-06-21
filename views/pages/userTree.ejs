@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Family Tree</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/orgchart@2.1.0/dist/css/jquery.orgchart.min.css"
+    />
+    <!-- Load jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <%- include('../partials/_styles') %>
+    <style>
+      #chart-container {
+        width: 100%;
+        /* height: 100vh; */
+        overflow: auto;
+        text-align: center;
+      }
+      .orgchart {
+        background: #191c24;
+      }
+      .node-img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 9px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-scroller">
+      <nav class="sidebar sidebar-offcanvas" id="sidebar">
+        <div
+          class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top"
+        >
+          <a class="sidebar-brand brand-logo" href="index.html"
+            ><img src="/images/logo.svg" alt="logo"
+          /></a>
+          <a class="sidebar-brand brand-logo-mini" href="index.html"
+            ><img src="/images/logo-mini.svg" alt="logo"
+          /></a>
+        </div>
+        <%- include('../partials/_sidebar') %>
+      </nav>
+      <div class="container-fluid page-body-wrapper">
+        <%- include('../partials/_navbar') %>
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div
+                      class="d-flex justify-content-between align-items-center mb-2"
+                    >
+                      <h4 class="m-0">Family Tree</h4>
+                      <a
+                        id="createChildBtn"
+                        class="btn btn-success mb-3"
+                        href="/create_child/<%- familyData._id %>"
+                        >+ Create New Child</a
+                      >
+                    </div>
+
+                    <div id="chart-container"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Load OrgChart library -->
+    <script src="https://cdn.jsdelivr.net/npm/orgchart@2.1.0/dist/js/jquery.orgchart.min.js"></script>
+
+    <script>
+              const familyData = <%- familyData %>;
+
+              document.getElementById('createChildBtn').href = `/create_child/${familyData._id}`;
+
+              function transformData(node) {
+
+                  let transformedNode = {
+                      id: node._id,
+                      name: `${node.firstname.trim()} ${node.lastname.trim()}`,
+                      title: node.relationship || 'Parent',
+                      img: node.photo
+                  };
+
+                  if (node.wife) {
+                      transformedNode.children = [transformData(node.wife)];
+                  }
+
+                  if (node.children && node.children.length > 0) {
+                      transformedNode.children = transformedNode.children || [];
+                      node.children.forEach(child => {
+                          transformedNode.children.push(transformData(child));
+                      });
+                  }
+
+                  return transformedNode;
+              }
+
+              const orgChartData = transformData(familyData);
+
+              $(document).ready(function() {
+          $('#chart-container').orgchart({
+              'data': orgChartData,
+              'nodeContent': 'title',
+              'pan': false,
+              'zoom': false,
+              'createNode': function($node, data) {
+                  const imgSrc = data.img;
+                  $node.on('click', function() {
+                  window.location.href = `/node-details/${data.id}`;
+                });
+                //   console.log(imgSrc,'imgrc')
+                  if (imgSrc != null) {
+                      $node.prepend(`<img src="../uploads/${imgSrc.replace('/images','')}" alt="${data.name}" class="node-img" />`);
+                  } else {
+                      $node.prepend(`<img src="https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg" alt="not found" class="node-img" />`);
+                  }
+              }
+          });
+      });
+    </script>
+  </body>
+</html>

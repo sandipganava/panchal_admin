@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Corona Admin</title>
+   <!-- styles -->
+  <%- include('../partials/_styles') %>
+    <!-- styles -->
+</head>
+
+<body>
+  <div class="container-scroller">
+
+    <!-- partial:partials/_sidebar -->
+    <nav class="sidebar sidebar-offcanvas" id="sidebar">
+      <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+        <a class="sidebar-brand brand-logo" href="index.html"><img src="/images/logo.svg" alt="logo" /></a>
+        <a class="sidebar-brand brand-logo-mini" href="index.html"><img src="/images/logo-mini.svg" alt="logo" /></a>
+      </div>
+       <!-- partial:partials/_sidebar -->
+      <%- include('../partials/_sidebar') %>
+    
+    </nav>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_navbar -->
+      <%- include('../partials/_navbar') %>
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title"> Form elements </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Form elements</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+            <div class="col-md-6 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">Default form</h4>
+                  <p class="card-description"> Basic form layout </p>
+                  <form class="forms-sample" autocomplete="off" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                      <label for="city">city</label>
+                      <input type="text" class="form-control" id="city" name="city" placeholder="City">
+                    </div>
+                    <div class="form-group">
+                      <label for="image">Image</label>
+                      <input type="file" class="form-control text-white" id="image" name="image" placeholder="Image">
+                  </div>
+                    <div class="form-group">
+                      <label for="village">Village</label>
+                      <input type="text" class="form-control" id="village" name="village" placeholder="Village">
+                    </div>
+                    <div class="form-group">
+                      <label for="pincode">Pincode</label>
+                      <input type="number" class="form-control" id="pincode" name="pincode" placeholder="Pincode">
+                    </div>
+                   
+                    <button type="submit" class="btn btn-primary me-2">Submit</button>
+                    <button class="btn btn-dark">Cancel</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+       
+        
+          </div>
+        </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:../../partials/_footer.html -->
+        <%- include('../partials/_footer') %>
+
+        <!-- partial -->
+      </div>
+      <!-- partial -->
+   
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <%- include('../partials/_scripts') %>
+
+</body>
+
+</html>

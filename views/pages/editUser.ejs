@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Corona Admin</title>
+   <!-- styles -->
+  <%- include('../partials/_styles') %>
+    <!-- styles -->
+</head>
+
+<body>
+  <div class="container-scroller">
+
+    <!-- partial:partials/_sidebar -->
+    <nav class="sidebar sidebar-offcanvas" id="sidebar">
+      <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+        <a class="sidebar-brand brand-logo" href="index.html"><img src="/images/logo.svg" alt="logo" /></a>
+        <a class="sidebar-brand brand-logo-mini" href="index.html"><img src="/images/logo-mini.svg" alt="logo" /></a>
+      </div>
+       <!-- partial:partials/_sidebar -->
+      <%- include('../partials/_sidebar') %>
+    
+    </nav>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_navbar -->
+      <%- include('../partials/_navbar') %>
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title"> Form elements </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Form elements</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+           
+            <div class="col-12 grid-margin">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">Personal info</h4>
+                  <form class="form-sample" method="post">
+                    <div class="row">
+                      
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">First Name</label>
+                          <div class="col-sm-9">
+                            <input type="text" class="form-control text-white" placeholder="First Name" name="firstname"  value="<%- userData.firstname %>"/>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">Middle Name</label>
+                          <div class="col-sm-9">
+                            <input type="text" name="middlename" class="form-control text-white" placeholder="Middle Name" value="<%- userData.middlename %>"  />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">Last Name</label>
+                          <div class="col-sm-9">
+                            <input type="text" name="lastname" class="form-control text-white" placeholder="Last Name" value="<%- userData.lastname %>" />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">Date of Birth</label>
+                          <div class="col-sm-9">
+                            <input type="date" class="form-control text-white" name="dob" placeholder="dd/mm/yyyy" value="<%- userData.dob %>" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">Email</label>
+                          <div class="col-sm-9">
+                            <input type="email" name="email" class="form-control text-white" placeholder="Email" value="<%- userData.email %>" />
+                          </div>
+                        </div>
+                      </div>
+                     
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">Education</label>
+                          <div class="col-sm-9">
+                            <input type="text" class="form-control text-white" name="education" placeholder="Education" value="<%- userData.education %>" />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">Phone number</label>
+                          <div class="col-sm-9">
+                            <input type="number" class="form-control text-white" name="mobile_number" placeholder="Phone Number" value="<%- userData.mobile_number %>" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">Gender</label>
+                          <div class="col-sm-2">
+                            <div class="form-check">
+                              <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="gender" id="genderMale" value="male"  <%= userData.gender == 'male' ? 'checked' : '' %>> Male
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-sm-2">
+                            <div class="form-check">
+                              <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="gender" id="genderFemale" value="female" <%= userData.gender == 'female' ? 'checked' : '' %>> Female
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-sm-5">
+                            <div class="form-check">
+                              <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="gender" id="genderOther" value="other" <%= userData.gender == 'other' ? 'checked' : '' %>> Other
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">Job</label>
+                          <div class="col-sm-9">
+                            <input type="text" class="form-control text-white" name="job" placeholder="Job" value="<%- userData.job %>" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                      <div class="row">
+              
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Select Marital Status </label>
+                            <div class="col-sm-9">
+                                <select class="form-control text-white" name="marital_status">
+                                    <option value="Married" <%= userData.marital_status == 'Married' ? 'selected' : '' %>>Married</option>
+                                    <option value="Unmarried" <%= userData.marital_status == 'Unmarried' ? 'selected' : '' %>>Unmarried</option>
+                                    <option value="Widower" <%= userData.marital_status == 'Widower' ? 'selected' : '' %>>Widower</option>
+                                    <option value="Widow" <%= userData.marital_status == 'Widow' ? 'selected' : '' %>>Widow</option>
+                                    <option value="Divorcee" <%= userData.marital_status == 'Divorcee' ? 'selected' : '' %>>Divorcee</option>
+                                </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Photo</label>
+                            <div class="col-sm-9">
+                              <input type="file" class="form-control text-white" placeholder="image" name="image" value="<%- userData.image %>" />
+                            </div>
+                          </div>
+                        </div>
+
+                    </div>
+                    <h4 class="card-title"> Address </h4>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label for="address" class="col-sm-3 col-form-label">Address</label>
+                          <div class="col-sm-9">
+                            <textarea id="address" name="address"  class="form-control text-white" rows="4" placeholder="Enter your address"><%- userData.address %></textarea>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">State</label>
+                          <div class="col-sm-9">
+                            <input type="text" name="state" value="<%- userData.state %>" class="form-control text-white" placeholder="State"  />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">City</label>
+                          <div class="col-sm-9">
+                            <input type="text" class="form-control text-white" placeholder="City" name="city" value="<%- userData.city %>"/>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                          <label class="col-sm-3 col-form-label">Pincode</label>
+                          <div class="col-sm-9">
+                            <input type="number" class="form-control text-white" placeholder="Pincode" name="pincode" value="<%- userData.pincode %>" />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Location</label>
+                            <div class="col-sm-9">
+                                <select class="form-control text-white" name="locations_id">
+                                    <option>Select Location</option>
+                                    <% village.forEach(data => { %>
+                                        <option value="<%= data._id %>" <%= userData.locations_id == data._id ? 'selected' : '' %>>
+                                            <%= data.village %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        </div>
+                       </div>
+                      </div>
+                    <button type="submit" class="btn btn-primary me-2">Submit</button>
+                    <a href="/users" class="btn btn-dark">Cancel</a>
+                  </form>
+                </div>
+              </div>
+            </div>
+           
+          
+          </div>
+        </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:../../partials/_footer.html -->
+        <%- include('../partials/_footer') %>
+        <!-- partial -->
+      </div>
+      <!-- partial -->
+   
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <%- include('../partials/_scripts') %>
+
+</body>
+
+</html>
+

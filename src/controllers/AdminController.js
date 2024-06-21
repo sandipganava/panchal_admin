@@ -1,0 +1,1296 @@
+
+// const user = require('../model/user')
+// const bcrypt = require('bcryptjs')
+
+const axios = require('axios');
+const jwt = require("jsonwebtoken");
+// var helpers = require("../helpers");
+const sessions = require("../middleware/session");
+const path = require('path');
+const joinpage = require('../model/joinpage')
+const user = require('../model/user')
+const location = require('../model/location')
+var helpers = require("../helpers");
+const fs = require('fs');
+require("dotenv").config();
+const baseURL = process.env.BASE_URL;
+
+// AdminController.js
+
+const AdminController = {};
+
+/**
+ * Renders the dashboard view.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+
+
+AdminController.loginPage = async (req, res) => {
+    sess = req.session;
+    if (!(sess.userdetails)) {
+        res.render('login', { failPass: req.flash("failPass"), failEmail: req.flash("failEmail"), })
+    } else {
+        res.redirect('/admin/index')
+    }
+};
+
+AdminController.login = async (req, res) => {
+    // console.log(req.cookies,'cookies')
+    try {
+        // const token = req.cookies.jwt;
+        // console.log(token, 'token')
+        const Logindata = {
+            email: req.body.email,
+            password: req.body.password,
+        };
+
+        const response = await axios.post(`${baseURL}/api/login`, Logindata);
+        //   console.log(response,'response')
+        if (response.data.emailError === "Invalid email") {
+            req.flash("failEmail", "Invalid email");
+            return res.redirect("/");
+        }
+
+        if (response.data.login_status === "login success") {
+            req.session.userdetails = response.data.userdetails;
+            res.cookie("jwt", response.data.token, {
+                maxAge: 1000 * 60 * 60 * 24, // 1 day
+                httpOnly: true,
+            });
+            return res.redirect("/admin/index");
+        }
+
+        req.flash("failPass", "Invalid password");
+        return res.redirect("/");
+    } catch (e) {
+        res.status(400).send(e);
+    }
+};
+
+AdminController.logoutuser = (req, res) => {
+    if (req.session) {
+        req.session.destroy((err) => {
+            if (err) {
+                res.status(400).send(err);
+            } else {
+                res.clearCookie('cookieName');
+                res.redirect("/");
+            }
+        });
+    }
+};
+
+AdminController.getforgotpass = async (req, res) => {
+    res.render('forgot')
+};
+
+AdminController.users = async (req, res) => {
+    try {
+        const response = await axios.get(`${baseURL}/api/user_listing/`);
+        const data = response.data;
+        res.render('pages/users', { users: data });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.dashboard = async (req, res) => {
+    try {
+        res.render('index');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+AdminController.admins = async (req, res) => {
+    try {
+        res.render('pages/admins');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+AdminController.users = async (req, res) => {
+    try {
+        const response = await axios.get(`${baseURL}/api/user_listing/`);
+        const data = response.data;
+        res.render('pages/users', { users: data });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+AdminController.createUser = async (req, res) => {
+    try {
+        const location = await axios.get(`${baseURL}/api/locationdata`);
+        // const meritalStatus = await axios.get(`${baseURL}/api/data`);
+        // console.log(location, 'location')
+        res.render('pages/createUser', { village: location.data });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+
+AdminController.addUser = async (req, res) => {
+    console.log(req.body, 'sdd')
+    try {
+        const response = await axios.post(`${baseURL}/api/user_register/`, { PerentsData: req.body });
+        const data = response.data;
+        res.redirect('/users');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.editUser = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.get(`${baseURL}/api/user-edit/${id}`);
+        const data = response.data;
+
+        const location = await axios.get(`${baseURL}/api/locationdata`);
+        // console.log(data, 'user data')
+        res.render('pages/editUser', { userData: data, village: location.data });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.updateUser = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.post(`${baseURL}/api/user-update/${id}`, req.body);
+        const data = response.data;
+        res.redirect('/users');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.deleteUser = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.post(`${baseURL}/api/user-delete/${id}`);
+        const data = response.data;
+        res.redirect('/users');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.viewTree = async (req, res) => {
+    // console.log(req.params.id,'req.params.id')
+    try {
+        const id = req.params.id;
+        const response = await axios.get(`${baseURL}/api/familyData/${id}`);
+        const data = response.data;
+        res.render('pages/userTree', { familyData: JSON.stringify(data) });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+
+}
+
+AdminController.nodeDetails = async (req, res) => {
+    
+    try {
+        const id = req.params.id;
+        var village ;
+        var userDetails;
+        const response = await axios.get(`${baseURL}/api/viewUser/${id}`);
+        const data = response.data;
+        
+        const formattedDate = new Date(data.User.dob).toISOString().split('T')[0];
+
+        if(data.User.parent_id != null){
+            const parentData = await user.findOne(
+                { deleted_at: null, _id: data.User.parent_id }, 
+               
+                );
+                console.log(parentData, 'parentData')
+                var locationId  = parentData.locations_id.toString();
+                
+                const villageData = await location.findOne( { deleted_at: null, _id: locationId } );
+                village = villageData.village;
+                userDetails = { ...data.User, dob: formattedDate, city: villageData.city, state: parentData.state, address: parentData.address }
+                 
+                if(data.User.dob == null){
+                    userDetails = { ...data.User, dob: null, city: villageData.city, state: parentData.state, address: parentData.address }
+                }
+        }else{
+
+            userDetails  = { ...data.User, dob: formattedDate };
+            village = data.villageData[0].village;
+        }
+      
+        res.render('pages/userView', { userDetails, village });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+
+}
+
+
+AdminController.create_child = async (req, res) => {
+
+    try {
+        const id = req.params.id;
+        const parentData = await axios.get(`${baseURL}/api/add_childUser/${id}`);
+        const relationshipData = await axios.get(`${baseURL}/api/relationship-data`);
+        res.render('pages/createChild', { parentData: parentData.data.parentData, relationship: relationshipData.data });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.addChild = async (req, res) => {
+    const id = req.params.id;
+    let childData;
+
+    try {
+
+        if (!req.files || !req.files.photo) {
+            console.log('No image uploaded');
+            childData = req.body;
+        } else {
+            let file = req.files.photo;
+            const uploadPath = path.join(__dirname, '../../uploads', file.name);
+
+            // Ensure the directory exists
+            fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
+
+            // Save the file
+            await new Promise((resolve, reject) => {
+                file.mv(uploadPath, (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                });
+            });
+
+            console.log('Image uploaded:', file.name);
+            childData = {
+                ...req.body,
+                photo: file.name
+            };
+        }
+        console.log(childData, 'childData')
+        const response = await axios.post(`${baseURL}/api/addfamily/${id}`, childData);
+        res.redirect(`/viewTree/${response.data.parentId}`);
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+//aboutus
+
+AdminController.abouts = async (req, res) => {
+    try {
+        const response = await helpers.axiosdata("get", "/api/aboutus")
+        // const response = await axios.get(`${baseURL}/api/aboutus/`, headers = {
+        //     "isadmin": true,
+        // },)
+        const data = response.data;
+        console.log(data, 'abouy')
+        res.render('pages/abouts', { aboutusData: data.AboutusData });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.addAboutPage = async (req, res) => {
+    try {
+        res.render('pages/createAboutusPage');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.addAboutUsDetails = async (req, res) => {
+    try {
+         
+        console.log(req.files.image, 'image')
+        if (!req.files || !req.files.image) {
+            throw new Error("No image file uploaded");
+        }
+
+        let file = req.files.image;
+        const uploadPath = path.join(__dirname, '../../uploads', file.name);
+
+        // Ensure directory exists
+        fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
+
+        // Save the file
+        await new Promise((resolve, reject) => {
+            file.mv(uploadPath, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve();
+            });
+        });
+
+        const aboutusData = {
+            title: req.body.title,
+            description: req.body.description,
+            image: file.name
+        };
+
+        const response = await axios.post(`${baseURL}/api/aboutus/`, aboutusData);
+        const data = response.data;
+        console.log(data)
+        res.redirect('/abouts');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.editAboutus = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.get(`${baseURL}/api/aboutus-edit/${id}`);
+        const data = response.data;
+        res.render('pages/editAboutus', { aboutusData: data });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.updateAboutus = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { title, description} = req.body;
+        let image = null;
+        if (req.files && req.files.image) {
+            image = req.files.image;
+            const uploadDir = path.join(__dirname, '../../uploads'); 
+            const uploadPath = path.join(uploadDir, image.name);
+
+            // Ensure directory exists
+            fs.mkdirSync(uploadDir, { recursive: true });
+
+            // Save the file
+            await new Promise((resolve, reject) => {
+                image.mv(uploadPath, (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                });
+            });
+        }
+
+        // Prepare data to be sent in the request
+        const aboutusData = {
+            title,
+            description,
+        }
+       
+        if (image) {
+            aboutusData.image = image.name;
+        }
+
+        const response = await axios.post(`${baseURL}/api/aboutus-edit/${id}`, aboutusData);
+        const data = response.data;
+        res.redirect('/abouts');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.deleteAboutus = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.post(`${baseURL}/api/delete_aboutus/${id}`);
+        const data = response.data;
+        res.redirect('/abouts');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+
+AdminController.villages = async (req, res) => {
+    try {
+        const response = await axios.get(`${baseURL}/api/location/`);
+        const data = response.data;
+        res.render('pages/villages', { locations: data.village });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+AdminController.createVillages = async (req, res) => {
+    try {
+        res.render('pages/createVillages');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.addVillages = async (req, res) => {
+    try {
+        if (!req.files || !req.files.image) {
+            throw new Error("No image file uploaded");
+        }
+
+        let file = req.files.image;
+        const uploadPath = path.join(__dirname, '../../uploads', file.name);
+
+        // Ensure directory exists
+        fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
+
+        // Save the file
+        await new Promise((resolve, reject) => {
+            file.mv(uploadPath, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve();
+            });
+        });
+
+        const villageData = {
+            ...req.body, 
+            image: file.name
+        };
+
+       const response =await axios.post(`${baseURL}/api/location/`, villageData);
+    //    console.log(response,'es')
+        res.redirect('/villages');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.editVillages = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.get(`${baseURL}/api/location-edit/${id}`);
+        const data = response.data;
+        res.render('pages/editVillages', { vlilage: data });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.updateVillages = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        let image = null;
+        if (req.files && req.files.image) {
+            image = req.files.image;
+            const uploadDir = path.join(__dirname, '../../uploads'); 
+            const uploadPath = path.join(uploadDir, image.name);
+
+            // Ensure directory exists
+            fs.mkdirSync(uploadDir, { recursive: true });
+
+            // Save the file
+            await new Promise((resolve, reject) => {
+                image.mv(uploadPath, (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                });
+            });
+        }
+
+        const villageData = {
+            ...req.body
+        }
+       
+        if (image) {
+            villageData.image = image.name;
+        }
+
+        const response = await axios.post(`${baseURL}/api/location-edit/${id}`, villageData);
+        const data = response.data;
+        res.redirect('/villages');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+AdminController.deleteVillages = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.post(`${baseURL}/api/location-delete/${id}`);
+        res.redirect('/villages');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.slider = async (req, res) => {
+    try {
+        const response = await axios.get(`${baseURL}/api/slider`);
+        const data = response.data;
+        console.log(data, 'data')
+        res.render('pages/slider', { sliders: data });
+
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.createSilder = async (req, res) => {
+    try {
+        res.render('pages/createSilder');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.addSlider = async (req, res) => {
+    // console.log(req.body, 'req.body');
+
+    try {
+        if (!req.files || !req.files.image) {
+            throw new Error("No image file uploaded");
+        }
+
+        let file = req.files.image;
+        const uploadPath = path.join(__dirname, '../../uploads', file.name);
+
+        // Ensure directory exists
+        fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
+
+        // Save the file
+        await new Promise((resolve, reject) => {
+            file.mv(uploadPath, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve();
+            });
+        });
+
+        const sliderData = {
+            title: req.body.title,
+            image: file.name
+        };
+
+
+        const response = await axios.post(`${baseURL}/api/slider/`, sliderData);
+        const data = response.data;
+        console.log(data);
+
+        res.redirect('/slider');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error adding slider:", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.deleteSlider = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.post(`${baseURL}/api/delete_slider/${id}`);
+        res.redirect('/slider');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.committee = async (req, res) => {
+    try {
+        const response = await axios.get(`${baseURL}/api/committee_members/`);
+        const committeeMembers = response.data;
+        res.render('pages/committee', { committeeMembers: committeeMembers });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+AdminController.createCommitee = async (req, res) => {
+    try {
+        res.render('pages/createCommitee');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+AdminController.postCommitee = async (req, res) => {
+    try {
+        if (!req.files || !req.files.image) {
+            throw new Error("No image file uploaded");
+        }
+
+        let file = req.files.image;
+        const uploadPath = path.join(__dirname, '../../uploads', file.name);
+
+        // Ensure directory exists
+        fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
+
+        // Save the file
+        await new Promise((resolve, reject) => {
+            file.mv(uploadPath, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve();
+            });
+        });
+
+        const committeeMembers = {
+            fullname: req.body.fullname,
+            role: req.body.role,
+            mobile_number: req.body.mobile_number,
+            village: req.body.village,
+            image: file.name
+        };
+
+
+        const response = await axios.post(`${baseURL}/api/committee_members/`, committeeMembers);
+        const data = response.data;
+        console.log(data);
+
+        res.redirect('/committee');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error adding slider:", error);
+        res.status(500).send("Internal Server Error");
+    }
+}
+AdminController.editCommitee = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.get(`${baseURL}/api/committee_members-edit/${id}`);
+        const data = response.data;
+        res.render('pages/editCommitee', { committeeMembers: data });
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+
+}
+AdminController.updateCommitee = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { fullname, role, mobile_number, village } = req.body;
+
+        let image = null;
+        if (req.files && req.files.image) {
+            image = req.files.image;
+            const uploadDir = path.join(__dirname, '../../uploads'); // Adjusted path
+            const uploadPath = path.join(uploadDir, image.name);
+
+            // Ensure directory exists
+            fs.mkdirSync(uploadDir, { recursive: true });
+
+            // Save the file
+            await new Promise((resolve, reject) => {
+                image.mv(uploadPath, (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                });
+            });
+        }
+
+        // Prepare data to be sent in the request
+        const commiteeData = {
+            fullname,
+            role,
+            mobile_number,
+            village,
+        };
+
+        // Add image to the request data only if it exists
+        if (image) {
+            commiteeData.image = image.name;
+        }
+
+        const response = await axios.post(`${baseURL}/api/committeemembers-edit/${id}`, commiteeData);
+        const data = response.data;
+        console.log(data);
+        res.redirect('/committee');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+
+}
+AdminController.deleteCommitee = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.post(`${baseURL}/api/delete_committee_members/${id}`);
+        res.redirect('/committee');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+}
+
+//News
+
+AdminController.news = async (req, res) => {
+    try {
+        const response = await axios.get(`${baseURL}/api/news`);
+        const data = response.data;
+
+        res.render('pages/news', { newsData: data });
+
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.createNews = async (req, res) => {
+    try {
+        res.render('pages/createNews');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.addNews = async (req, res) => {
+    try {
+        if (!req.files || !req.files.image) {
+            throw new Error("No image file uploaded");
+        }
+
+        let file = req.files.image;
+        const uploadPath = path.join(__dirname, '../../uploads', file.name);
+
+        // Ensure directory exists
+        fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
+
+        // Save the file
+        await new Promise((resolve, reject) => {
+            file.mv(uploadPath, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve();
+            });
+        });
+
+        const newsData = {
+            title: req.body.title,
+            image: file.name,
+            description: req.body.description,
+            created_by: req.body.created_by
+        };
+
+        axios.post(`${baseURL}/api/news/`, newsData);
+        res.redirect('/news');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.editNews = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.get(`${baseURL}/api/news-edit/${id}`);
+        const data = response.data;
+        res.render('pages/editNews', { newsData: data });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.updateNews = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { title, description, created_by } = req.body;
+
+        let image = null;
+        if (req.files && req.files.image) {
+            image = req.files.image;
+            const uploadDir = path.join(__dirname, '../../uploads');
+            const uploadPath = path.join(uploadDir, image.name);
+
+            // Ensure directory exists
+            fs.mkdirSync(uploadDir, { recursive: true });
+
+            // Save the file
+            await new Promise((resolve, reject) => {
+                image.mv(uploadPath, (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                });
+            });
+        }
+
+        const newsData = {
+            title,
+            description,
+            created_by
+        };
+
+        if (image) {
+            newsData.image = image.name;
+        }
+
+        const response = await axios.post(`${baseURL}/api/news-edit/${id}`, newsData);
+        const data = response.data;
+        console.log(data);
+        res.redirect('/news');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.deleteNews = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.post(`${baseURL}/api/news-delete/${id}`);
+        res.redirect('/news');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+}
+
+AdminController.password = async (req, res) => {
+    try {
+        res.render('pages/password');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+AdminController.changeuserPassword = async (req, res) => {
+    try {
+        const response = await axios.post(`${baseURL}/api/changePassword`, req.body);
+        const data = response.data;
+        console.log(data, 'data')
+        res.redirect('/changeuserPassword');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+
+}
+
+// Faqs api
+
+AdminController.faqs = async (req, res) => {
+
+    try {
+        const response = await axios.get(`${baseURL}/api/faq`);
+        const faqsData = response.data;
+        // console.log(settingsData, 'settingsData')
+        res.render('pages/faqs', { faqsData: faqsData });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.createFaqs = async (req, res) => {
+    try {
+        res.render('pages/createFaqs');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.addFaqs = async (req, res) => {
+    try {
+        axios.post(`${baseURL}/api/faq/`, req.body);
+        res.redirect('/faqs');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.editFaqs = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.get(`${baseURL}/api/faq-edit/${id}`);
+        const data = response.data;
+        res.render('pages/editFaqs', { faqsData: data });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.updateFaqs = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.post(`${baseURL}/api/faq-edit/${id}`, req.body);
+        const data = response.data;
+        res.redirect('/faqs');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+AdminController.deleteFaqs = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.post(`${baseURL}/api/faq-delete/${id}`);
+        res.redirect('/faqs');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+
+}
+
+AdminController.settings = async (req, res) => {
+    try {
+        const response = await axios.get(`${baseURL}/api/listsettings`);
+        const settingsData = response.data;
+        res.render('pages/settings', { SettingsData: settingsData });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+AdminController.settingForm = async (req, res) => {
+    try {
+        res.render('pages/createSetting');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+
+}
+AdminController.createSetting = async (req, res) => {
+    try {
+        const { key, type, value } = req.body;
+        let settingData = {
+            key,
+            type,
+        };
+
+        if (type === 'image' && req.files && req.files.value) {
+            const image = req.files.value;
+            const uploadDir = path.join(__dirname, '../../uploads'); // Adjust path as needed
+            const uploadPath = path.join(uploadDir, image.name);
+
+            // Ensure directory exists
+            fs.mkdirSync(uploadDir, { recursive: true });
+
+            // Save the file
+            await new Promise((resolve, reject) => {
+                image.mv(uploadPath, (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                });
+            });
+
+            settingData.value = image.name;
+        } else {
+            settingData.value = value;
+        }
+
+        const response = await axios.post(`${baseURL}/api/createSetting`, settingData);
+        const data = response.data;
+        console.log(data, 'data');
+        res.redirect('/settings');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+
+}
+AdminController.editSetting = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.get(`${baseURL}/api/editSetting/${id}`);
+        const data = response.data;
+        res.render('pages/editSetting', { settingData: data });
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+}
+AdminController.updateSetting = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { key, type, value } = req.body;
+
+        let settingData = {
+            key,
+            type,
+        };
+
+        if (type === 'image' && req.files && req.files.value) {
+            const image = req.files.value;
+            const uploadDir = path.join(__dirname, '../../uploads');
+            const uploadPath = path.join(uploadDir, image.name);
+
+            // Ensure directory exists
+            fs.mkdirSync(uploadDir, { recursive: true });
+
+            // Save the file
+            await new Promise((resolve, reject) => {
+                image.mv(uploadPath, (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                });
+            });
+
+            settingData.value = image.name;
+        } else {
+            settingData.value = value;
+        }
+
+        const response = await axios.post(`${baseURL}/api/editSetting/${id}`, settingData);
+        const data = response.data;
+        console.log(data, 'data');
+        res.redirect('/settings');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+}
+
+AdminController.deleteSetting = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.post(`${baseURL}/api/deleteSetting/${id}`);
+        res.redirect('/settings');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+
+}
+
+AdminController.payments = async (req, res) => {
+    try {
+        res.render('pages/payments');
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+AdminController.contacts = async (req, res) => {
+    try {
+        const response = await axios.get(`${baseURL}/api/email_support`);
+        const data = response.data;
+        res.render('pages/contacts', { contactData: data });
+    } catch (error) {
+        // Handle rendering errors
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+
+AdminController.joinpage = async (req, res) => {
+    var userData = req.session.userdetails
+    console.log('ajay')
+    try {
+        const token = req.cookies.jwt;
+        const response = await helpers.axiosdata("get", "/api/joinpage");
+        const joinpage = response.data;
+        res.render('pages/joinpage', { userData, joinpage })
+    } catch (error) {
+        console.log(error)
+        res.status(400).send(error);
+    }
+}
+AdminController.addjoinpage = async (req, res) => {
+    var userData = req.session.userdetails
+    try {
+        res.render('pages/createJoinpage', { userData })
+    } catch (error) {
+        console.log(error)
+        res.status(400).send(error);
+    }
+}
+AdminController.addjoinpageData = async (req, res) => {
+    var userData = req.session.userdetails
+    try {
+
+        let file = req.files.image;
+        file.mv("uploads/" + file.name);
+        const token = req.cookies.jwt;
+        const joinpageData = {
+            title: req.body.title,
+            description: req.body.description,
+            image: file.name,
+        };
+        helpers
+            .axiosdata("post", "/api/createjoinpage", token, joinpageData)
+            .then(async function (response) {
+                res.redirect('/joinpage')
+            })
+            .catch(function (response) {
+                console.log(response);
+            });
+    } catch (error) {
+        console.log(error)
+        res.status(400).send(error);
+    }
+}
+
+AdminController.edit_joinpage = async (req, res) => {
+    var userData = req.session.userdetails
+    var id = req.params.id
+    try {
+        const token = req.cookies.jwt;
+
+        helpers
+            .axiosdata("get", "/api/editjoinpage/" + id, token)
+            .then(async function (response) {
+                var joinpage = response.data
+                res.render('pages/editJoinpage', { joinpage, userData })
+            })
+            .catch(function (response) {
+                console.log(response);
+            });
+    } catch (e) {
+        res.status(400).send(e);
+    }
+}
+
+AdminController.joinpage_update = async (req, res) => {
+    var id = req.params.id
+    if (!req.files) {
+        try {
+            const token = req.cookies.jwt;
+            const joinpageData = {
+                title: req.body.title,
+                description: req.body.description,
+            };
+            helpers
+                .axiosdata("post", "/api/editjoinpage/" + id, token, joinpageData)
+                .then(async function (response) {
+                    res.redirect('/joinpage')
+                })
+                .catch(function (response) {
+                    console.log("error", response);
+                });
+        } catch (e) {
+            res.status(400).send(e);
+        }
+    } else {
+        try {
+            const token = req.cookies.jwt;
+            let file = req.files.image;
+            file.mv("uploads/" + file.name);
+
+            const joinpageData = {
+                title: req.body.title,
+                description: req.body.description,
+                image: file.name,
+            };
+            helpers
+                .axiosdata("post", "/api/editjoinpage/" + id, token, joinpageData)
+                .then(async function (response) {
+                    res.redirect('/joinpage')
+                })
+                .catch(function (response) {
+                    console.log("error", response);
+                });
+        } catch (e) {
+            console.log(e, "error2")
+            res.status(400).send(e);
+        }
+    }
+}
+
+AdminController.delete_joinpage = async (req, res) => {
+    var id = req.params.id
+    try {
+        const delete_joinpage = {
+            deleted_at: Date(),
+        };
+
+        await joinpage.findByIdAndUpdate(id, delete_joinpage);
+        res.redirect('/joinpage')
+    } catch (error) {
+        console.log(error)
+        res.status(500).send(error);
+    }
+}
+
+
+module.exports = AdminController;

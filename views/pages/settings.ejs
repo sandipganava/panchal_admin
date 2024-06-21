@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Corona Admin</title>
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+/>
+  <!-- styles -->
+  <%- include('../partials/_styles') %>
+  <style>
+    .fixed-width-table {
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    .fixed-width-table th.No {
+      width: 6%;
+    }
+
+    .fixed-width-table th.Key {
+      width: 15%;
+    }
+
+    .fixed-width-table th.Type {
+      width: 15%;
+    }
+
+    .fixed-width-table th.Action {
+      width: 15%;
+      text-align: center;
+    }
+
+    .fixed-width-table td {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      padding: 25px;
+      line-height: 2;
+    }
+  </style>
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css">
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js" defer></script>
+  <!-- styles -->
+</head>
+
+<body>
+  <div class="container-scroller">
+
+    <!-- partial:partials/_sidebar -->
+    <nav class="sidebar sidebar-offcanvas" id="sidebar">
+      <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+        <a class="sidebar-brand brand-logo" href="index.html"><img src="/images/logo.svg" alt="logo" /></a>
+        <a class="sidebar-brand brand-logo-mini" href="index.html"><img src="/images/logo-mini.svg" alt="logo" /></a>
+      </div>
+      <!-- partial:partials/_sidebar -->
+      <%- include('../partials/_sidebar') %>
+
+    </nav>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_navbar -->
+      <%- include('../partials/_navbar') %>
+      <div class="main-panel">
+        <div class="content-wrapper">
+
+          <div class="row">
+
+
+            <div class="col-lg-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4 class="m-0">Setting</h4>
+                    <a class="btn btn-success mb-3" href="/addAboutPage">+ Add</a>
+                  </div>
+
+                  <div class="table-responsive">
+                    <table id="myTable" class="table table-sm table-bordered fixed-width-table">
+                      <thead>
+                        <tr>
+                          <th class="No"> No </th>
+                          <th class="Key"> Key  </th>
+                          <th class="Type"> Type </th>
+                          <th class="Value"> Value </th>
+                          <th class="Action">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% function isImage(filename) { const imageExtensions=[".jpg", ".jpeg" , ".png" , ".gif"
+                          , ".bmp" ]; const fileExtension=filename.toLowerCase().slice(filename.lastIndexOf('.'));
+                          return imageExtensions.includes(fileExtension); } %>
+                          <% if (SettingsData) { %>
+                            <% for(var i=0; i < SettingsData.length; i++) { %>
+
+                              <tr>
+                                <td>
+                                  <%= i+1 %>
+                                </td>
+                                <td>
+                                  <%= SettingsData[i].key %>
+                                </td>
+                                <td>
+                                  <%= SettingsData[i].type %>
+                                </td>
+                                <td>
+                                  <% if (isImage(SettingsData[i].value)) { %>
+                                    <img src="/uploads/<%= SettingsData[i].value %>" height="150px"
+                                      width="150px" alt="" />
+                                    <% } else { %>
+                                      <%= SettingsData[i].value %>
+                                        <% } %>
+                                </td>
+
+
+
+                                <td>
+                                  <a
+                                href="/editSetting/<%= SettingsData[i]._id %>"
+                                style="
+                                  margin-right: 1rem;
+                                  margin-left: 1rem;
+                                  text-decoration: none;
+                                "
+                              >
+                                <i
+                                  class="fa-solid fa-pen-to-square text-primary"
+                                  style="font-size: 18px"
+                                ></i>
+                              </a>
+                              <a
+                                href="/deleteSetting/<%= SettingsData[i]._id %>"
+                                style="text-decoration: none"
+                              >
+                                <i
+                                  class="fa-solid fa-trash text-danger"
+                                  style="font-size: 18px"
+                                ></i>
+                              </a>
+                                  
+                                </td>
+                              </tr>
+                              <%}%>
+                                <%}%>
+                      </tbody>
+                    </table>
+                  </div>
+                  <script>
+                    $(document).ready(function() {
+                      $('#myTable').DataTable();
+                    });
+                  </script>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:../../partials/_footer.html -->
+        <%- include('../partials/_footer') %>
+        <!-- partial -->
+      </div>
+      <!-- partial -->
+
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <%- include('../partials/_scripts') %>
+
+</body>
+
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Corona Admin</title>
+  <!-- styles -->
+  <style>
+    .bg {
+      background-color : #191c24 !important;
+      color : #fff !important;
+      border : none !important;
+    }
+  </style>
+  <%- include('../partials/_styles') %>
+    <!-- styles -->
+</head>
+
+<body>
+  <div class="container-scroller">
+
+    <!-- partial :-partials/_sidebar -->
+    <nav class="sidebar sidebar-offcanvas" id="sidebar">
+      <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+        <a class="sidebar-brand brand-logo" href="index.html"><img src="/images/logo.svg" alt="logo" /></a>
+        <a class="sidebar-brand brand-logo-mini" href="index.html"><img src="/images/logo-mini.svg" alt="logo" /></a>
+      </div>
+      <!-- partial :-partials/_sidebar -->
+      <%- include('../partials/_sidebar') %>
+
+    </nav>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial :-partials/_navbar -->
+      <%- include('../partials/_navbar') %>
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title"> Form elements </h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Form elements</li>
+                </ol>
+              </nav>
+            </div>
+            <div class="row">
+
+              <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Personal info</h4>
+                    <form class="form-sample" method="post">
+                      <div class="row">
+
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                          
+                              <label class="col-sm-3 col-form-label">First Name :-</label>
+                              <div class="col-sm-9">
+                                <input type="text" class="form-control bg" placeholder="First Name"
+                                  value="<%-userDetails.firstname %>" name="firstname" readonly />
+                              </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Middle Name :-</label>
+                            <div class="col-sm-9">
+                              <input type="text" name="middlename" class="form-control bg"
+                                value="<%-userDetails.middlename %>" placeholder="Middle Name" readonly />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Last Name :-</label>
+                            <div class="col-sm-9">
+                              <input type="text" name="lastname" class="form-control bg" placeholder="Last Name"
+                                value="<%-userDetails.lastname %>" readonly />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Date of Birth :-</label>
+                            <div class="col-sm-9">
+                              <input type="date" class="form-control bg" name="dob" placeholder="dd/mm/yyyy"
+                                value="<%-userDetails.dob %>" readonly />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Email :-</label>
+                            <div class="col-sm-9">
+                              <input type="email" name="email" class="form-control bg" placeholder="Email"
+                                value="<%-userDetails.email %>" readonly />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Education :-</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control bg" value="<%-userDetails.education %>" name="education"
+                                placeholder="Education" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Phone number :-</label>
+                            <div class="col-sm-9">
+                              <input type="number" class="form-control bg" name="mobile_number"
+                                placeholder="Phone Number" value="<%-userDetails.mobile_number %>" readonly />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Gender :-</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control bg" value="<%-userDetails.gender %>" readonly />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Job :-</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control bg" name="job" value="<%-userDetails.job %>"
+                                placeholder="Job" readonly />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Marital Status :-</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control bg" value="<%-userDetails.marital_status %>"
+                               readonly />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <h4 class="card-title"> Address </h4>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label for="address" class="col-sm-3 col-form-label">Address :-</label>
+                            <div class="col-sm-9">
+                              <textarea id="address" name="address" class="form-control bg" rows="4"
+                                readonly><%-userDetails.address %></textarea>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">State :-</label>
+                            <div class="col-sm-9">
+                              <input type="text" name="state" class="form-control bg" placeholder="State" value="<%-userDetails.state %>" readonly/>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">City :-</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control bg" placeholder="City" name="city" value="<%-userDetails.city %>" readonly/>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Location :-</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control bg" value="<%= village %>" readonly/>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button type="submit" class="btn btn-primary me-2">Submit</button>
+                      <a href="/users" class="btn btn-dark">Cancel</a>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
+          </div>
+          <!-- content-wrapper ends -->
+          <!-- partial :-../../partials/_footer.html -->
+          <%- include('../partials/_footer') %>
+            <!-- partial -->
+        </div>
+        <!-- partial -->
+
+        <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <%- include('../partials/_scripts') %>
+
+</body>
+
+</html>

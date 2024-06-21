@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Corona Admin</title>
+    <!-- styles -->
+    <%- include('../partials/_styles') %>
+    <!-- styles -->
+  </head>
+
+  <body>
+    <div class="container-scroller">
+      <!-- partial:partials/_sidebar -->
+      <nav class="sidebar sidebar-offcanvas" id="sidebar">
+        <div
+          class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top"
+        >
+          <a class="sidebar-brand brand-logo" href="index.html"
+            ><img src="/images/logo.svg" alt="logo"
+          /></a>
+          <a class="sidebar-brand brand-logo-mini" href="index.html"
+            ><img src="/images/logo-mini.svg" alt="logo"
+          /></a>
+        </div>
+        <!-- partial:partials/_sidebar -->
+        <%- include('../partials/_sidebar') %>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_navbar -->
+        <%- include('../partials/_navbar') %>
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title">Hello, Admin Welcome</h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">
+                    Form elements
+                  </li>
+                </ol>
+              </nav>
+            </div>
+            <div class="row">
+              <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Setting</h4>
+
+                    <form
+                      method="post"
+                      action=""
+                      id="settingForm"
+                      enctype="multipart/form-data"
+                    >
+                      <br />
+                      <div class="row">
+                        <div class="col-4">
+                          <label for="Name">
+                            Key: <span class="require">*</span></label
+                          >
+                          <input
+                            type="text"
+                            class="form-control text-white"
+                            name="key"
+                            id="username"
+                            placeholder="Enter Setting Name"
+                            value=""
+                            required
+                            onKeyPress="return ValidateAlpha(event);"
+                            oninvalid="this.setCustomValidity('Enter Role Name Here')"
+                            oninput="this.setCustomValidity('')"
+                          />
+                        </div>
+                        <div class="col-4">
+                          <label for="Name"
+                            >Type: <span class="require">*</span></label
+                          >
+                          <select
+                            class="form-control text-white"
+                            id="type"
+                            name="type"
+                            onchange="updateValueField()"
+                          >
+                            <option value="">Select Type</option>
+                            <option value="text">text</option>
+                            <option value="image">image</option>
+                          </select>
+                        </div>
+                        <div class="col-4" id="valueContainer">
+                          <label for="Name"
+                            >Value: <span class="require">*</span></label
+                          >
+                          <input
+                            type="text"
+                            class="form-control text-white"
+                            name="value"
+                            id="value"
+                            placeholder="Enter Setting Value"
+                            value=""
+                            required
+                          />
+                        </div>
+                        <div class="col-12 mt-5">
+                          <button
+                            type="submit"
+                            name="submit"
+                            id="submit"
+                            class="btn btn-primary"
+                          >
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <%- include('../partials/_footer') %>
+
+          <!-- partial -->
+        </div>
+        <!-- partial -->
+
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+
+    <%- include('../partials/_scripts') %>
+    <script>
+      function updateValueField() {
+        const type = document.getElementById("type").value;
+        const valueContainer = document.getElementById("valueContainer");
+
+        // Clear the current value container content
+        valueContainer.innerHTML = "";
+
+        // Update the label
+        const label = document.createElement("label");
+        label.innerHTML = 'Value: <span class="require">*</span>';
+        valueContainer.appendChild(label);
+
+        // Add the appropriate input based on the selected type
+        if (type === "text") {
+          const input = document.createElement("input");
+          input.type = "text";
+          input.className = "form-control";
+          input.name = "value";
+          input.id = "value";
+          input.placeholder = "Enter Setting Value";
+          input.required = true;
+          valueContainer.appendChild(input);
+        } else if (type === "image") {
+          const input = document.createElement("input");
+          input.type = "file";
+          input.className = "form-control";
+          input.name = "value";
+          input.id = "value";
+          input.required = true;
+          valueContainer.appendChild(input);
+        }
+      }
+
+      function ValidateAlpha(evt) {
+        var keyCode = evt.keyCode || evt.which;
+        var regex = /^[A-Za-z]+$/;
+        var isValid = regex.test(String.fromCharCode(keyCode));
+        if (!isValid) {
+          evt.preventDefault();
+        }
+      }
+    </script>
+  </body>
+</html>
