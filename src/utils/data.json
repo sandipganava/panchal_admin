@@ -1,37 +1,44 @@
 {
-    "relationship": [
-      { "key": "Father", "value": "Father / પિતા" },
-      { "key": "Mother", "value": "Mother / માતા" },
-      { "key": "Husband", "value": "Husband / પતિ" },
-      { "key": "Wife", "value": "Wife / પત્ની" },
-      { "key": "Son", "value": "Son / પુત્ર" },
-      { "key": "Daughter", "value": "Daughter / પુત્રી" },
-      { "key": "GrandSon", "value": "Grand son / પૌત્ર" },
-      { "key": "GrandDaughter", "value": "Grand daughter / પૌત્રી" },
-      { "key": "Brother", "value": "Brother / ભાઈ" },
-      { "key": "Sister", "value": "Sister / બહેન" },
-      { "key": "Grandfather", "value": "Grandfather  / દાદા" },
-      { "key": "Grandmother", "value": "Grandmother  / દાદી" },
-      { "key": "Daughter-in-law", "value": "Daughter-in-law  / પુત્રવધૂ" }
-    ],
-    
-    "relationshipDetails": [
-      { "key": "Ramesh's Father", "value": "Father" },
-      { "key": "Ramesh's Mother", "value": "Mother","root":0 },
-      { "key": "Ramesh's Wife", "value": "Wife","root":1 },
-      { "key": "Ramesh's Child", "value": "Child","root":2 },
-      { "key": "Mother", "value": "Mother / માતા" },
-      { "key": "Husband", "value": "Husband / પતિ" },
-      { "key": "Wife", "value": "Wife / પત્ની" },
-      { "key": "Son", "value": "Son / પુત્ર" },
-      { "key": "Daughter", "value": "Daughter / પુત્રી" },
-      { "key": "GrandSon", "value": "Grand son / પૌત્ર" },
-      { "key": "GrandDaughter", "value": "Grand daughter / પૌત્રી" },
-      { "key": "Brother", "value": "Brother / ભાઈ" },
-      { "key": "Sister", "value": "Sister / બહેન" },
-      { "key": "Grandfather", "value": "Grandfather  / દાદા" },
-      { "key": "Grandmother", "value": "Grandmother  / દાદી" },
-      { "key": "Daughter-in-law", "value": "Daughter-in-law  / પુત્રવધૂ" }
-    ]
-  }
-  
+  "relationship": [
+    {
+      "value": "Father",
+      "keyE": "Father",
+      "keyG": "પિતા"
+    },
+    {
+      "value": "Mother",
+      "keyE": "Mother",
+      "keyG": "માતા"
+    },
+    {
+      "value": "Husband",
+      "keyE": "Husband",
+      "keyG": "પતિ"
+    },
+    {
+      "value": "Wife",
+      "keyE": "Wife",
+      "keyG": "પત્ની"
+    },
+    {
+      "value": "Son",
+      "keyE": "Son",
+      "keyG": "પુત્ર"
+    },
+    {
+      "value": "Daughter",
+      "keyE": "Daughter",
+      "keyG": "પુત્રી"
+    },
+    {
+      "value": "Grandfather",
+      "keyE": "Grandfather",
+      "keyG": "દાદા"
+    },
+    {
+      "value": "Grandmother",
+      "keyE": "Grandmother",
+      "keyG": "દાદી"
+    }
+  ]
+}

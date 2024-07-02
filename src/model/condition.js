@@ -2,10 +2,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 
 
-const NewsSchema = mongoose.Schema({
-    createdBy: {
-        type: String,
-    },
+const condition = mongoose.Schema({
     titleE: {
         type: String,
     },
@@ -16,9 +13,6 @@ const NewsSchema = mongoose.Schema({
         type: String,
     },
     descriptionG: {
-        type: String,
-    },
-    image: {
         type: String,
     },
     created_at: {
@@ -36,5 +30,5 @@ const NewsSchema = mongoose.Schema({
 
 });
 
-const News = mongoose.model("news", NewsSchema);
-module.exports = News;
+const Condition = mongoose.model("condition", condition);
+module.exports = Condition;

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 
 const conn = process.env.CONNECTION;
-// console.log(conn)
+console.log(conn,"sasasasas")
 mongoose.set("strictQuery", false);
 
 mongoose

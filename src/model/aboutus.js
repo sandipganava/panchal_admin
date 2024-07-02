@@ -4,13 +4,19 @@ const mongoose = require("mongoose");
 
 const AboutUsSchema = mongoose.Schema({
  
-    title: {
+    titleE: {
+        type: String,
+    },
+    titleG: {
+        type: String,
+    },
+    descriptionE: {
+        type: String,
+    },
+    descriptionG: {
         type: String,
     },
     image: {
-        type: String,
-    },
-    description: {
         type: String,
     },
     created_at: {

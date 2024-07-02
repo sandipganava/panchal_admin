@@ -4,7 +4,7 @@ const fileUpload = require('express-fileupload');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const flash = require('express-flash');
+// const flash = require('express-flash');
 var indexRouter = require('./src/routes/index');
 var apiRouter = require('./src/API/apiroutes/apiRoutes');
 
@@ -13,7 +13,7 @@ app.use(fileUpload({
   createParentPath: true
 }));
 
-app.use(flash());
+// app.use(flash());
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

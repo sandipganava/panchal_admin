@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Corona Admin</title>
   <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
-
   <!-- styles -->
   <%- include('../partials/_styles') %>
     <!-- styles -->
@@ -33,7 +32,7 @@
         <div class="main-panel">
           <div class="content-wrapper">
             <div class="page-header">
-              <h3 class="page-title"> Hello, Admin Welcome </h3>
+              <h3 class="page-title"> Form elements </h3>
               <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                   <li class="breadcrumb-item"><a href="#">Forms</a></li>
@@ -45,52 +44,33 @@
               <div class="col-md-6 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
-                    <h4 class="card-title">News Section</h4>
-
+                    <h4 class="card-title">Terms and condition</h4>
 
                     <form class="forms-sample" autocomplete="off" method="post" enctype="multipart/form-data">
-
-                      <div class="form-group">
-                        <label for="created_by">Created By</label>
-                        <input type="text" class="form-control text-white" id="created_by" name="created_by"
-                          placeholder="created by" value="<%- newsData.createdBy %>">
-                      </div>
-                      <div class="form-group">
-                        <label for="image">Image</label>
-                        <input type="file" class="form-control" id="image" name="image" placeholder="Image"
-                          value="<%- newsData.image %>">
-                      </div>
-                    
                       <div class="form-group">
                         <label for="title">English Title</label>
-                        <input type="text" class="form-control text-white" id="title" name="titleE" placeholder="English Title"
-                          value="<%- newsData.titleE %>">
+                        <textarea type="text" class="form-control text-white" id="title" name="titleE"
+                          placeholder="English Title"> </textarea>
                       </div>
-
                       <div class="form-group">
-                        <label for="description">English Description:</label>
-                        <textarea class="form-control" id="descriptionE" name="descriptionE"
-                          placeholder="English Description"><%= newsData.descriptionE %></textarea>
+                        <label for="description">English Description</label>
+                        <textarea type="text" class="form-control text-white" id="descriptionE" name="descriptionE"
+                          placeholder="English Description"> </textarea>
                       </div>
-
                       <div class="form-group">
                         <label for="title">Gujarati Title</label>
-                        <input type="text" class="form-control text-white" id="title" name="titleG" placeholder="Gujarati Title"
-                          value="<%- newsData.titleG %>">
+                        <textarea type="text" class="form-control text-white" id="title" name="titleG"
+                          placeholder="Gujarati Title"> </textarea>
                       </div>
-
                       <div class="form-group">
-                        <label for="description">Gujarati Description:</label>
-                        <textarea class="form-control" id="descriptionG" name="descriptionG"
-                          placeholder="Gujarati Description"><%= newsData.descriptionG %></textarea>
+                        <label for="description">Gujarati Description</label>
+                        <textarea type="text" class="form-control text-white" id="descriptionG" name="descriptionG"
+                          placeholder="description"> </textarea>
                       </div>
-
 
                       <button type="submit" class="btn btn-primary me-2">Submit</button>
-                      <a href="/news" class="btn btn-dark">Cancel</a>
+                      <a href="/faqs" class="btn btn-dark">Cancel</a>
                     </form>
-
-
                   </div>
                 </div>
               </div>
@@ -98,7 +78,8 @@
 
             </div>
           </div>
-
+          <!-- content-wrapper ends -->
+          <!-- partial:../../partials/_footer.html -->
           <%- include('../partials/_footer') %>
 
             <!-- partial -->
@@ -113,9 +94,9 @@
 
   <%- include('../partials/_scripts') %>
     <script>
-      CKEDITOR.replace('descriptionE');
-      CKEDITOR.replace('descriptionG');
+      CKEDITOR.replace('description');
     </script>
+
 </body>
 
 </html>

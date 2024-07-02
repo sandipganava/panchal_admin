@@ -152,4 +152,11 @@ apirouter.get('/editjoinpage/:id', user.editjoinpage);
 apirouter.post('/editjoinpage/:id', user.updatejoinpage);
 apirouter.post('/deletejoinpage/:id', user.deletejoinpage);
 
+// terms and condition
+apirouter.get('/termsandcondition',  user.termsandcondition);
+apirouter.post('/createTermsandcondition',  user.createTermsandcondition);
+apirouter.get('/editTermsandcondition/:id',  user.editcreateTermsandcondition);
+apirouter.post('/editTermsandcondition/:id',  user.updatecreateTermsandcondition);
+apirouter.get('/deleteTermsandcondition/:id',  user.deletecreateTermsandcondition);
+
 module.exports = apirouter;

@@ -48,16 +48,24 @@
                   <p class="card-description"> Basic form layout </p>
                   <form class="forms-sample" autocomplete="off" method="post" enctype="multipart/form-data">
                     <div class="form-group">
-                      <label for="title">Ttile</label>
-                      <input type="text" class="form-control" id="title" name="title" placeholder="title" value="<%- aboutusData.title %>">
+                      <label for="title">English Title</label>
+                      <input type="text" class="form-control" id="title" name="titleE" placeholder="English Title" value="<%- aboutusData.titleE %>">
+                    </div>
+                    <div class="form-group">
+                      <label for="title">Gujarati Title</label>
+                      <input type="text" class="form-control" id="title" name="titleG" placeholder="Gujarati Title" value="<%- aboutusData.title %>">
                     </div>
                     <div class="form-group">
                       <label for="image">Image</label>
                       <input type="file" class="form-control" id="image" name="image" placeholder="Image">
                   </div>
                     <div class="form-group">
-                        <label for="description">Description:</label>
-                        <textarea class="form-control" id="description" name="description" placeholder="Description"><%= aboutusData.description %></textarea>
+                        <label for="description">English Description:</label>
+                        <textarea class="form-control" id="descriptionE" name="descriptionE" placeholder="Description"><%= aboutusData.descriptionE %></textarea>
+                      </div>
+                    <div class="form-group">
+                        <label for="description">Gujarati Description:</label>
+                        <textarea class="form-control" id="descriptionG" name="descriptionG" placeholder="Description"><%= aboutusData.descriptionG %></textarea>
                       </div>
                    
                     <button type="submit" class="btn btn-primary me-2">Submit</button>

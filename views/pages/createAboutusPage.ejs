@@ -48,16 +48,24 @@
                
                   <form class="forms-sample" autocomplete="off" method="post" enctype="multipart/form-data">
                     <div class="form-group">
-                      <label for="title">Ttile</label>
-                      <input type="text" class="form-control text-white" id="title" name="title" placeholder="title">
+                      <label for="title">English title</label>
+                      <input type="text" class="form-control text-white" id="title" name="titleE" placeholder="English title">
+                    </div>
+                    <div class="form-group">
+                      <label for="title">Gujarati title</label>
+                      <input type="text" class="form-control text-white" id="title" name="titleG" placeholder="Gujarati title">
                     </div>
                     <div class="form-group">
                       <label for="image">Image</label>
                       <input type="file" class="form-control text-white" id="image" name="image" placeholder="Image">
                   </div>
                     <div class="form-group">
-                      <label for="description">Description:</label>
-                      <textarea class="form-control" id="description" name="description" placeholder="Description"></textarea>
+                      <label for="description">English Description:</label>
+                      <textarea class="form-control" id="descriptionE" name="descriptionE" placeholder="English Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label for="description">Gujarati Description:</label>
+                      <textarea class="form-control" id="descriptionG" name="descriptionG" placeholder="Gujarati Description"></textarea>
                     </div>
                    
                     <button type="submit" class="btn btn-primary me-2">Submit</button>
@@ -88,7 +96,8 @@
 
    <!-- Initialize CKEditor -->
   <script>
-    CKEDITOR.replace('description');
+    CKEDITOR.replace('descriptionE');
+    CKEDITOR.replace('descriptionG');
   </script>
 
 </body>

@@ -5,13 +5,14 @@
 const axios = require('axios');
 const jwt = require("jsonwebtoken");
 // var helpers = require("../helpers");
-const sessions = require("../middleware/session");
+// const sessions = require("../middleware/session");
 const path = require('path');
 const joinpage = require('../model/joinpage')
 const user = require('../model/user')
 const location = require('../model/location')
 var helpers = require("../helpers");
 const fs = require('fs');
+const Condition = require('../model/condition');
 require("dotenv").config();
 const baseURL = process.env.BASE_URL;
 
@@ -28,8 +29,8 @@ const AdminController = {};
 
 AdminController.loginPage = async (req, res) => {
     sess = req.session;
-    if (!(sess.userdetails)) {
-        res.render('login', { failPass: req.flash("failPass"), failEmail: req.flash("failEmail"), })
+    if (!(sess?.userdetails)) {
+        res.render('index')
     } else {
         res.redirect('/admin/index')
     }
@@ -48,7 +49,7 @@ AdminController.login = async (req, res) => {
         const response = await axios.post(`${baseURL}/api/login`, Logindata);
         //   console.log(response,'response')
         if (response.data.emailError === "Invalid email") {
-            req.flash("failEmail", "Invalid email");
+            // req.flash("failEmail", "Invalid email");
             return res.redirect("/");
         }
 
@@ -61,7 +62,7 @@ AdminController.login = async (req, res) => {
             return res.redirect("/admin/index");
         }
 
-        req.flash("failPass", "Invalid password");
+        // req.flash("failPass", "Invalid password");
         return res.redirect("/");
     } catch (e) {
         res.status(400).send(e);
@@ -212,37 +213,37 @@ AdminController.viewTree = async (req, res) => {
 }
 
 AdminController.nodeDetails = async (req, res) => {
-    
+
     try {
         const id = req.params.id;
-        var village ;
+        var village;
         var userDetails;
         const response = await axios.get(`${baseURL}/api/viewUser/${id}`);
         const data = response.data;
-        
+
         const formattedDate = new Date(data.User.dob).toISOString().split('T')[0];
 
-        if(data.User.parent_id != null){
+        if (data.User.parent_id != null) {
             const parentData = await user.findOne(
-                { deleted_at: null, _id: data.User.parent_id }, 
-               
-                );
-                console.log(parentData, 'parentData')
-                var locationId  = parentData.locations_id.toString();
-                
-                const villageData = await location.findOne( { deleted_at: null, _id: locationId } );
-                village = villageData.village;
-                userDetails = { ...data.User, dob: formattedDate, city: villageData.city, state: parentData.state, address: parentData.address }
-                 
-                if(data.User.dob == null){
-                    userDetails = { ...data.User, dob: null, city: villageData.city, state: parentData.state, address: parentData.address }
-                }
-        }else{
+                { deleted_at: null, _id: data.User.parent_id },
 
-            userDetails  = { ...data.User, dob: formattedDate };
+            );
+            console.log(parentData, 'parentData')
+            var locationId = parentData.locations_id.toString();
+
+            const villageData = await location.findOne({ deleted_at: null, _id: locationId });
+            village = villageData.village;
+            userDetails = { ...data.User, dob: formattedDate, city: villageData.city, state: parentData.state, address: parentData.address }
+
+            if (data.User.dob == null) {
+                userDetails = { ...data.User, dob: null, city: villageData.city, state: parentData.state, address: parentData.address }
+            }
+        } else {
+
+            userDetails = { ...data.User, dob: formattedDate };
             village = data.villageData[0].village;
         }
-      
+
         res.render('pages/userView', { userDetails, village });
     } catch (error) {
         // Handle rendering errors
@@ -319,7 +320,7 @@ AdminController.abouts = async (req, res) => {
         //     "isadmin": true,
         // },)
         const data = response.data;
-        console.log(data, 'abouy')
+        console.log(data, 'data')
         res.render('pages/abouts', { aboutusData: data.AboutusData });
     } catch (error) {
         // Handle rendering errors
@@ -340,7 +341,7 @@ AdminController.addAboutPage = async (req, res) => {
 
 AdminController.addAboutUsDetails = async (req, res) => {
     try {
-         
+
         console.log(req.files.image, 'image')
         if (!req.files || !req.files.image) {
             throw new Error("No image file uploaded");
@@ -363,8 +364,10 @@ AdminController.addAboutUsDetails = async (req, res) => {
         });
 
         const aboutusData = {
-            title: req.body.title,
-            description: req.body.description,
+            titleE: req.body.titleE,
+            descriptionE: req.body.descriptionE,
+            titleG: req.body.titleG,
+            descriptionG: req.body.descriptionG,
             image: file.name
         };
 
@@ -395,11 +398,11 @@ AdminController.editAboutus = async (req, res) => {
 AdminController.updateAboutus = async (req, res) => {
     try {
         const id = req.params.id;
-        const { title, description} = req.body;
+        const { titleE, descriptionE, titleG, descriptionG } = req.body;
         let image = null;
         if (req.files && req.files.image) {
             image = req.files.image;
-            const uploadDir = path.join(__dirname, '../../uploads'); 
+            const uploadDir = path.join(__dirname, '../../uploads');
             const uploadPath = path.join(uploadDir, image.name);
 
             // Ensure directory exists
@@ -418,10 +421,9 @@ AdminController.updateAboutus = async (req, res) => {
 
         // Prepare data to be sent in the request
         const aboutusData = {
-            title,
-            description,
+            titleE, descriptionE, titleG, descriptionG,
         }
-       
+
         if (image) {
             aboutusData.image = image.name;
         }
@@ -495,12 +497,12 @@ AdminController.addVillages = async (req, res) => {
         });
 
         const villageData = {
-            ...req.body, 
+            ...req.body,
             image: file.name
         };
 
-       const response =await axios.post(`${baseURL}/api/location/`, villageData);
-    //    console.log(response,'es')
+        const response = await axios.post(`${baseURL}/api/location/`, villageData);
+        //    console.log(response,'es')
         res.redirect('/villages');
     } catch (error) {
         // Handle rendering errors
@@ -529,7 +531,7 @@ AdminController.updateVillages = async (req, res) => {
         let image = null;
         if (req.files && req.files.image) {
             image = req.files.image;
-            const uploadDir = path.join(__dirname, '../../uploads'); 
+            const uploadDir = path.join(__dirname, '../../uploads');
             const uploadPath = path.join(uploadDir, image.name);
 
             // Ensure directory exists
@@ -549,7 +551,7 @@ AdminController.updateVillages = async (req, res) => {
         const villageData = {
             ...req.body
         }
-       
+
         if (image) {
             villageData.image = image.name;
         }
@@ -832,9 +834,11 @@ AdminController.addNews = async (req, res) => {
         });
 
         const newsData = {
-            title: req.body.title,
+            titleE: req.body.titleE,
+            titleG: req.body.titleG,
             image: file.name,
-            description: req.body.description,
+            descriptionE: req.body.descriptionE,
+            descriptionG: req.body.descriptionG,
             created_by: req.body.created_by
         };
 
@@ -863,7 +867,7 @@ AdminController.editNews = async (req, res) => {
 AdminController.updateNews = async (req, res) => {
     try {
         const id = req.params.id;
-        const { title, description, created_by } = req.body;
+        const { titleE, titleG, descriptionE, descriptionG, created_by } = req.body;
 
         let image = null;
         if (req.files && req.files.image) {
@@ -886,9 +890,12 @@ AdminController.updateNews = async (req, res) => {
         }
 
         const newsData = {
-            title,
-            description,
+            titleE,
+            titleG,
+            descriptionE,
+            descriptionG,
             created_by
+
         };
 
         if (image) {
@@ -1164,29 +1171,25 @@ AdminController.contacts = async (req, res) => {
 
 
 AdminController.joinpage = async (req, res) => {
-    var userData = req.session.userdetails
-    console.log('ajay')
     try {
         const token = req.cookies.jwt;
         const response = await helpers.axiosdata("get", "/api/joinpage");
         const joinpage = response.data;
-        res.render('pages/joinpage', { userData, joinpage })
+        res.render('pages/joinpage', {  joinpage })
     } catch (error) {
         console.log(error)
         res.status(400).send(error);
     }
 }
 AdminController.addjoinpage = async (req, res) => {
-    var userData = req.session.userdetails
     try {
-        res.render('pages/createJoinpage', { userData })
+        res.render('pages/createJoinpage')
     } catch (error) {
         console.log(error)
         res.status(400).send(error);
     }
 }
 AdminController.addjoinpageData = async (req, res) => {
-    var userData = req.session.userdetails
     try {
 
         let file = req.files.image;
@@ -1289,6 +1292,80 @@ AdminController.delete_joinpage = async (req, res) => {
     } catch (error) {
         console.log(error)
         res.status(500).send(error);
+    }
+}
+
+AdminController.termsandcondition = async (req, res) => {
+    try {
+        const response = await axios.get(`${baseURL}/api/termsandcondition`);
+        const termsandcondition = response.data;
+        res.render('pages/termsandcondition', { termsandcondition })
+    } catch (error) {
+        console.log(error)
+        res.status(400).send(error);
+    }
+}
+
+AdminController.createTermsandcondition = async (req, res) => {
+    try {
+        res.render('pages/createTermsandcondition')
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+AdminController.addTermsandcondition = async (req, res) => {
+    try {
+        const termsandconditionData = {
+            titleE: req.body.titleE,
+            titleG: req.body.titleG,
+            descriptionE: req.body.descriptionE,
+            descriptionG: req.body.descriptionG,
+        };
+        axios.post(`${baseURL}/api/createTermsandcondition`, termsandconditionData);
+        res.redirect('/termsandcondition')
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+AdminController.editTermsandcondition = async (req, res) => {
+    var id = req.params.id
+    try {
+        const response = await axios.get(`${baseURL}/api/editTermsandcondition/${id}`);
+        const termsandcondition = response.data;
+        res.render('pages/editTermsandcondition', { termsandcondition })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+AdminController.updateTermsandcondition = async (req, res) => {
+    var id = req.params.id
+    try {
+        const termsandconditionData = {
+            titleE: req.body.titleE,
+            titleG: req.body.titleG,
+            descriptionE: req.body.descriptionE,
+            descriptionG: req.body.descriptionG,
+        };
+        axios.post(`${baseURL}/api/editTermsandcondition/${id}`, termsandconditionData);
+        res.redirect('/termsandcondition')
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+AdminController.deleteTermsandcondition = async (req, res) => {
+    var id = req.params.id
+    try {
+        const delete_termsandcondition = {
+            deleted_at: Date(),
+        };
+        await Condition.findByIdAndUpdate(id, delete_termsandcondition);
+        res.redirect('/termsandcondition')
+    } catch (error) {
+        console.log(error)
     }
 }
 

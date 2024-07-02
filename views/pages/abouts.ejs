@@ -92,8 +92,10 @@
                         <tr>
                           <th class="No"> No </th>
                           <th class="Image" style="text-align: center;"> Image </th>
-                          <th class="Title"> Title </th>
-                          <th> Description </th>
+                          <th class="Title"> titleG </th>
+                          <th> DescriptionG </th>
+                          <th class="Title"> titleG </th>
+                          <th> DescriptionG </th>
                           <th class="Action"> Action </th>
                         </tr>
                       </thead>
@@ -103,8 +105,10 @@
                             <tr class="h-auto">
                               <td> <%= i +1 %> </td>
                               <td style="text-align: center;"> <img src="/uploads/<%= aboutusData[i].image %>" alt="" style="width: 150px; height: 150px;"> </td>
-                              <td> <%= aboutusData[i].title %> </td>
-                              <td> <%- aboutusData[i].description %> </td>
+                              <td> <%= aboutusData[i].titleE %> </td>
+                              <td> <%- aboutusData[i].descriptionE %> </td>
+                              <td> <%= aboutusData[i].titleG %> </td>
+                              <td> <%- aboutusData[i].descriptionG %> </td>
                               <td>
                                 <a
                                 href="/editAboutus/<%= aboutusData[i]._id %>"

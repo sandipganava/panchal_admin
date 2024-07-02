@@ -80,8 +80,21 @@
                             <img src="/uploads/<%= newsData[i].image %>" alt="<%= newsData[i].image %>" style="width: 100px; height: 100px;">
                             </td>
                           <td style="width: 100px;"> <%= newsData[i].createdBy %> </td>
-                          <td style="width: 100px;"> <%= newsData[i].title %> </td>
+                          <td style="width: 100px;"> <%= newsData[i].titleE %> </td>
                           <td>
+                            <a
+                                href="/api/notification/<%= newsData[i]._id %>"
+                                style="
+                                  margin-right: 1rem;
+                                  margin-left: 1rem;
+                                  text-decoration: none;
+                                "
+                              >
+                                <i
+                                  class="fa-solid fa-pen-to-square text-primary"
+                                  style="font-size: 18px"
+                                ></i>
+                              </a>
                             <a
                                 href="/editNews/<%= newsData[i]._id %>"
                                 style="

@@ -3,10 +3,16 @@ const mongoose = require("mongoose");
 
 
 const FaqSchema = mongoose.Schema({
-    question: {
+    questionE: {
         type: String,
     },
-    answer: {
+    answerE: {
+        type: String,
+    },
+    questionG: {
+        type: String,
+    },
+    answerG: {
         type: String,
     },
     created_at: {

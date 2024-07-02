@@ -35,14 +35,15 @@ const { default: axios } = require('axios')
 const NodeCache = require("node-cache");
 const cache = new NodeCache();
 require("dotenv").config();
-// const serviceAccount = require('../../utils/serviceAccountKey.json');
+const serviceAccount = require('../../utils/serviceAccountKey.json');
 const adminEmail = 'codecrew0@gmail.com';
 const mongoose = require('mongoose');
 const Emailsupport = require('../../model/emailsupport')
-// firebase_admin.initializeApp({
-//     credential: firebase_admin.credential.cert(serviceAccount),
-//     databaseURL: 'https://your-project-id.firebaseio.com', // Replace with your Firebase project URL
-// });
+const Condition = require('../../model/condition')
+firebase_admin.initializeApp({
+    credential: firebase_admin.credential.cert(serviceAccount),
+    databaseURL: 'https://your-project-id.firebaseio.com', // Replace with your Firebase project URL
+});
 
 
 
@@ -757,16 +758,28 @@ apicontroller.addchildUser = async (req, res) => {
 apicontroller.user_list = async (req, res) => {
 
     try {
-        // const paymentNullData = await user.deleteMany({ payment_id: null , parent_id: null });
-        // const Useradd = await user.find({ parent_id: null, deleted_at: null, payment_id: { $ne: null } });
+        console.log(req.query.search, 'req.query')
+        const { search } = req.query;
 
-        const Useradd = await user.aggregate([
+        // Build the match condition dynamically based on search parameters
+        const matchConditions = {
+            parent_id: null,
+            deleted_at: null,
+            payment_id: { $ne: null }
+        };
+
+        if (search) {
+            const searchRegex = new RegExp(search, 'i');
+            matchConditions.$or = [
+                { firstname: searchRegex },
+                { middlename: searchRegex },
+                { lastname: searchRegex }
+            ];
+        }
+
+        const userData = await user.aggregate([
             {
-                $match: {
-                    parent_id: null,
-                    deleted_at: null,
-                    payment_id: { $ne: null }
-                }
+                $match: matchConditions
             },
             {
                 $lookup: {
@@ -776,15 +789,17 @@ apicontroller.user_list = async (req, res) => {
                     as: "locationsData",
                 },
             },
-
         ]);
-        Useradd.sort((a, b) => a.firstname.localeCompare(b.firstname, 'en', { sensitivity: 'base' }));
 
+        // Sort by first name
+        userData.sort((a, b) => a.firstname.localeCompare(b.firstname, 'en', { sensitivity: 'base' }));
+
+        // Capitalize first letter of names
         function capitalizeFirstLetter(word) {
             return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
         }
 
-        Useradd.forEach(user => {
+        userData.forEach(user => {
             if (user.firstname) {
                 user.firstname = capitalizeFirstLetter(user.firstname.trim());
             }
@@ -796,13 +811,15 @@ apicontroller.user_list = async (req, res) => {
             }
         });
 
-        res.status(200).json(Useradd)
+        // console.log(userData, 'userData');
+        res.status(200).json(userData);
 
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).json(error);
     }
 }
+
 apicontroller.user_listing = async (req, res) => {
 
 
@@ -1566,10 +1583,13 @@ apicontroller.CommitteeMembers_update = async (req, res) => {
 
 
 apicontroller.aboutus = async (req, res) => {
+    console.log(req.body, 'req.body')
     try {
         const addAboutus = new aboutus({
-            title: req.body.title,
-            description: req.body.description,
+            titleE: req.body.titleE,
+            descriptionE: req.body.descriptionE,
+            titleG: req.body.titleG,
+            descriptionG: req.body.descriptionG,
             image: req.body.image
         });
         const Aboutus = await addAboutus.save();
@@ -1587,14 +1607,13 @@ apicontroller.listaboutus = async (req, res) => {
     try {
         let AboutusData;
         const isadmin = req.headers.isadmin;
-        console.log(isadmin, 'isadmin')
         if (isadmin) {
             if (cache.has('aboutus')) {
                 console.log('Cache has aboutus')
                 AboutusData = JSON.parse(cache.get('aboutus'));
             } else {
                 console.log('Cache has no aboutus');
-                AboutusData = await aboutus.find({ deleted_at: null }, { title: 1, description: 1, image: 1 }).sort({ created_at: -1 });
+                AboutusData = await aboutus.find({ deleted_at: null }).sort({ created_at: -1 });
                 cache.set('aboutus', JSON.stringify(AboutusData));
             }
             // console.log(object)
@@ -1605,9 +1624,10 @@ apicontroller.listaboutus = async (req, res) => {
                 AboutusData = JSON.parse(cache.get('aboutus'));
             } else {
                 console.log('Cache has no aboutus');
-                AboutusData = await aboutus.findOne({ deleted_at: null }, { title: 1, description: 1, image: 1 }).sort({ created_at: -1 });
+                AboutusData = await aboutus.findOne({ deleted_at: null }).sort({ created_at: -1 });
                 cache.set('aboutus', JSON.stringify(AboutusData));
             }
+            console.log(AboutusData, 'AboutusData')
             return res.status(200).json({ AboutusData });
         }
 
@@ -1649,8 +1669,10 @@ apicontroller.aboutus_update = async (req, res) => {
 
     try {
         const updateAboutus = {
-            title: req.body.title,
-            description: req.body.description,
+            titleE: req.body.titleE,
+            descriptionE: req.body.descriptionE,
+            titleG: req.body.titleG,
+            descriptionG: req.body.descriptionG,
             image: req.body.image,
             updated_at: Date(),
         };
@@ -2071,6 +2093,7 @@ apicontroller.news = async (req, res) => {
             newsdata = await news.find({ deleted_at: null }).sort({ created_at: -1 })
             cache.set('news', JSON.stringify(newsdata));
         }
+
         return res.status(200).json(newsdata);
     } catch (error) {
         console.log(error)
@@ -2079,11 +2102,12 @@ apicontroller.news = async (req, res) => {
 }
 
 apicontroller.newsPost = async (req, res) => {
-    // console.log(req.body,'req body')
     try {
         const newNews = new news({
-            title: req.body.title,
-            description: req.body.description,
+            titleE: req.body.titleE,
+            descriptionE: req.body.descriptionE,
+            titleG: req.body.titleG,
+            descriptionG: req.body.descriptionG,
             image: req.body.image,
             createdBy: req.body.created_by
         });
@@ -2093,36 +2117,6 @@ apicontroller.newsPost = async (req, res) => {
         const uniqueTokens = [...new Set(filteredTokens)];
         cache.del('news');
         const newsData = await newNews.save();
-
-        // console.log(uniqueTokens, "uniqueTokens")
-        // try {
-        //     const message = {
-        //         notification: {
-        //             title: newsData.title,
-        //             // body: newsData.description,
-        //             imageUrl: 'https://codecrewinfotech.com/images/logos/logo-cc.png',
-        //         },
-        //         data: {
-        //             newsId: newsData._id.toString(),
-        //         },
-        //     };
-
-        //     const response = await firebase_admin.messaging().sendToDevice(uniqueTokens, message);
-
-        //     response.results.forEach((result, index) => {
-        //         const error = result.error;
-        //         if (error) {
-        //             console.error(`Error sending message to ${uniqueTokens[index]}:`, error);
-        //         } else {
-        //             console.log(`Successfully sent message to ${uniqueTokens[index]}`);
-        //         }
-        //     });
-
-        //     // res.status(200).json({ message: "Notification sent successfully" });
-        // } catch (error) {
-        //     // res.status(500).json({ error: error.message });
-        //     console.error('Error sending message:', error);
-        // }
 
         return res.status(200).json(newsData);
 
@@ -2147,9 +2141,11 @@ apicontroller.news_update = async (req, res) => {
     var id = req.params.id
     try {
         const updateNews = {
-            title: req.body.title,
-            description: req.body.description,
-            image: req.body?.image,
+            titleE: req.body.titleE,
+            descriptionE: req.body.descriptionE,
+            titleG: req.body.titleG,
+            descriptionG: req.body.descriptionG,
+            image: req.body.image,
             createdBy: req.body.created_by,
             updated_at: Date(),
         };
@@ -2185,15 +2181,25 @@ apicontroller.notification = async (req, res) => {
     var id = req.params.id
     try {
         const news_edit = await news.findOne({ _id: id });
-        const registrationTokens = await user.find({ deleted_at: null, parent_id: null, });
+        if (!news_edit) {
+            return res.status(404).json({ message: "News item not found" });
+        }
+
+        const registrationTokens = await user.find({ deleted_at: null, parent_id: null });
         const registrationToken = registrationTokens.map((element) => element.device_token);
         const filteredTokens = registrationToken.filter(token => token !== null && token !== undefined);
         const uniqueTokens = [...new Set(filteredTokens)];
+        console.log(filteredTokens, "filteredTokens")
+
+        if (uniqueTokens.length === 0) {
+            return res.status(400).json({ message: "No valid device tokens found" });
+        }
+
         try {
             const message = {
                 notification: {
-                    title: news_edit.title,
-                    // body: news_edit.description,
+                    title: news_edit.title ? String(news_edit.title) : "New Notification",
+                    // body: news_edit.description ? String(news_edit.description) : "",
                     imageUrl: 'https://codecrewinfotech.com/images/logos/logo-cc.png',
                 },
                 data: {
@@ -2203,27 +2209,33 @@ apicontroller.notification = async (req, res) => {
 
             const response = await firebase_admin.messaging().sendToDevice(uniqueTokens, message);
 
-            // Iterate through the results to handle successful and failed deliveries
+            let successCount = 0;
+            let failureCount = 0;
+
             response.results.forEach((result, index) => {
                 const error = result.error;
                 if (error) {
-                    // Handle the error for this registration token
+                    failureCount++;
                     console.error(`Error sending message to ${uniqueTokens[index]}:`, error);
                 } else {
-                    // Message was sent successfully to this registration token
+                    successCount++;
                     console.log(`Successfully sent message to ${uniqueTokens[index]}`);
                 }
             });
 
-            res.status(200).json({ message: "Notification sent successfully" });
+            res.status(200).json({ 
+                message: "Notification process completed", 
+                successCount, 
+                failureCount 
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
             console.error('Error sending message:', error);
+            res.status(500).json({ error: error.message });
         }
 
     } catch (error) {
-        res.status(500).send(error);
-        console.log(error)
+        console.error('Error in notification function:', error);
+        res.status(500).json({ error: error.message });
     }
 }
 
@@ -2408,12 +2420,10 @@ apicontroller.getfaq = async (req, res) => {
 
 apicontroller.createfaq = async (req, res) => {
     try {
-        const { question, answer } = req.body
+        const { questionE, answerG, questionG, answerE } = req.body
         const newFaq = new Faq({
-            question,
-            answer
+            questionE, answerG, questionG, answerE
         });
-        console.log(newFaq, "newFaq")
         const faqData = await newFaq.save();
         res.status(200).json(faqData)
     } catch (error) {
@@ -2435,10 +2445,9 @@ apicontroller.editfaq = async (req, res) => {
 apicontroller.updatefaq = async (req, res) => {
     try {
         const id = req.params.id;
-        const { question, answer } = req.body
+        const { questionE, answerG, questionG, answerE } = req.body
         const updateFaq = {
-            question,
-            answer
+            questionE, answerG, questionG, answerE
         };
         const newsave = await Faq.findByIdAndUpdate(id, updateFaq, { new: true });
         res.status(200).json(newsave);
@@ -2598,7 +2607,79 @@ apicontroller.deletejoinpage = async (req, res) => {
     }
 }
 
+apicontroller.termsandcondition = async (req, res) => {
+    try {
+        const termsData = await Condition.find({ deleted_at: null }).sort({ created_at: -1 });
+        // console.log(termsData, 'termsData')
+        res.status(200).json(termsData)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json(error)
+    }
+}
 
+apicontroller.createTermsandcondition = async (req, res) => {
+    try {
+        const { titleE, descriptionE, titleG, descriptionG } = req.body
+        const newTerms = new Condition({
+            titleE,
+            descriptionE,
+            titleG,
+            descriptionG
+        });
+        const termsData = await newTerms.save();
+        console.log(termsData, 'termsData')
+        res.status(200).json(termsData)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json(error)
+    }
+}
+
+apicontroller.editcreateTermsandcondition = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const termsData = await Condition.findOne({ _id: id });
+        res.status(200).json(termsData)
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json(error)
+
+    }
+}
+
+apicontroller.updatecreateTermsandcondition = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { titleE, descriptionE, titleG, descriptionG } = req.body
+        const updateTerms = {
+            titleE,
+            descriptionE,
+            titleG,
+            descriptionG
+        };
+        const newsave = await Condition.findByIdAndUpdate(id, updateTerms, { new: true });
+        res.status(200).json(newsave);
+    } catch (error) {
+        console.log(error)
+        res.status(500).json(error)
+    }
+}
+
+apicontroller.deletecreateTermsandcondition = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const deleteTerms = {
+            deleted_at: Date(),
+        };
+        const newsave = await Condition.findByIdAndUpdate(id, deleteTerms);
+        res.status(200).json(newsave);
+    } catch (error) {
+        console.log(error)
+        res.status(500).json(error)
+    }
+}
 
 
 
