@@ -24,6 +24,8 @@ ios/.xcode.env.local
 .env
 # Android/IntelliJ
 #
+src\utils\serviceAccountKey.json
+
 build/
 .idea
 .gradle
