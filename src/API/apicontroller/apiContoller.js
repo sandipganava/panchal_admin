@@ -40,6 +40,7 @@ const adminEmail = 'codecrew0@gmail.com';
 const mongoose = require('mongoose');
 const Emailsupport = require('../../model/emailsupport')
 const Condition = require('../../model/condition')
+const { error } = require('console')
 firebase_admin.initializeApp({
     credential: firebase_admin.credential.cert(serviceAccount),
     databaseURL: 'https://your-project-id.firebaseio.com', // Replace with your Firebase project URL
@@ -105,6 +106,7 @@ function constructFamilyTree(person, childData) {
 
     return familyTree;
 }
+
 
 
 
@@ -892,7 +894,7 @@ apicontroller.user_delete = async (req, res) => {
         if (newsave) {
             const parent_id = newsave.parent_id
             const familyData = await user.find({ parent_id: parent_id, deleted_at: null });
-            res.status(200).json({ familyData: familyData })
+            res.status(200).json({ familyData: familyData ,showMessage: true, message: "User Deleted Successfully" });
         }
 
     } catch (error) {
@@ -989,7 +991,6 @@ apicontroller.location_update = async (req, res) => {
 
 apicontroller.user_update = async (req, res) => {
     var id = req.params.id
-    console.log(req.body, 'user data')
     try {
         const updateUser = {
             firstname: req.body.firstname,
@@ -1014,7 +1015,7 @@ apicontroller.user_update = async (req, res) => {
         };
 
         const newsave = await user.findByIdAndUpdate(id, updateUser, { new: true });
-        res.status(200).json(newsave);
+        res.status(200).json({ newsave, showMessage: true, message: "User Updated Successfully" });
 
     } catch (error) {
         res.status(500).send(error);
@@ -1058,7 +1059,7 @@ apicontroller.child_update = async (req, res) => {
         const findmain = await user.findOne({ _id: id });
         const parent_id = findmain.parent_id
         const childData = await user.find({ parent_id: parent_id, deleted_at: null });
-        res.status(200).json({ newsave, childData });
+        res.status(200).json({ newsave, childData ,showMessage: true, message: "User Updated Successfully" });
 
     } catch (error) {
         console.log(error)
@@ -1144,7 +1145,7 @@ apicontroller.forgetpass = async (req, res) => {
                 Otp,
                 date
             );
-            res.status(200).json({ status: true,showMessage: true,  message: "Email Sent Successfully" });
+            res.status(200).json({ status: true, showMessage: true, message: "Email Sent Successfully" });
         } else {
             console.log("Email Not found")
             res.json({ status: false, message: "Email Not found" });
@@ -1165,7 +1166,7 @@ apicontroller.checkOtp = async (req, res) => {
         // console.log(savedOTP,'savedOTP')
 
         if (savedOTP) {
-            res.status(200).json({ status: true, user_id: savedOTP.user_id,showMessage: true,  message: "Otp Match Successfully" });
+            res.status(200).json({ status: true, user_id: savedOTP.user_id, showMessage: true, message: "Otp Match Successfully" });
         } else {
             res.json({ status: false, showMessage: true, message: "Otp is Mismatch or Expiry" });
         }
@@ -1222,9 +1223,9 @@ apicontroller.postpassword = async (req, res) => {
                 )
                     .then(updatedUser => {
                         if (updatedUser) {
-                            res.status(200).json({showMessage: true, message: "Password updated successfully"})
+                            res.status(200).json({ showMessage: true, message: "Password updated successfully" })
                         } else {
-                            res.json({showMessage: true, message: "no user found"})
+                            res.json({ showMessage: true, message: "no user found" })
                         }
                     })
                     .catch(error => {
@@ -1288,19 +1289,19 @@ apicontroller.change_user_password = async (req, res) => {
         const userData = await user.find({ _id: new ObjectId(_id) });
         const isMatch = await bcrypt.compare(password, userData[0].password);
         if (!isMatch) {
-            res.json({
+            res.status(400).json({
                 changePassStatus: false,
-                message: "incorrect current password",
+                error: "incorrect current password",
             });
         } else if (!(newpwd == cpassword)) {
-            res.json({
+            res.status(400).json({
                 changePassStatus: false,
-                message: "confirm password not matched",
+                error: "confirm password not matched",
             });
         } else {
             const newsave = await user.findByIdAndUpdate(_id, newpassword);
 
-            res.status(200).json({ changePassStatus: true, message: "Your Password  Updated successfully" });
+            res.status(200).json({ changePassStatus: true, showMessage: true, message: "Your Password Updated successfully" });
         }
     } catch (err) {
         console.log(err)
