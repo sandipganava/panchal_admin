@@ -170,7 +170,6 @@ apicontroller.userlogin = async (req, res) => {
         const query = isEmail
             ? { email: email_or_mobile, deleted_at: null, payment_id: { $ne: null } }
             : { mobile_number: parseInt(email_or_mobile), deleted_at: null, payment_id: { $ne: null } };
-        console.log("query", query);
 
         const userFound = await user.findOne(query);
 
@@ -717,7 +716,7 @@ apicontroller.addfamily = async (req, res) => {
 
         const savedUser = await newUser.save();
         // console.log(savedUser, "savedUser")
-        res.status(200).json({ success: true, savedUser, parentId });
+        res.status(200).json({ success: true, savedUser, parentId, showMessage: true, message: "Family member added successfully" });
     } catch (error) {
         console.error('Error saving users:', error);
         res.json({ success: false, error: error.message });
@@ -747,7 +746,7 @@ apicontroller.addchildUser = async (req, res) => {
         }
 
         const familyData = await user.find({ parent_id: parentId, deleted_at: null });
-        res.status(200).json({ success: true, data: savedUsers, familyData: familyData });
+        res.status(200).json({ success: true, data: savedUsers, familyData: familyData, showMessage: true, message: "Family member added successfully" });
     } catch (error) {
         console.error('Error saving users:', error);
         res.json({ success: false, error: error.message });
@@ -758,7 +757,6 @@ apicontroller.addchildUser = async (req, res) => {
 apicontroller.user_list = async (req, res) => {
 
     try {
-        console.log(req.query.search, 'req.query')
         const { search } = req.query;
 
         // Build the match condition dynamically based on search parameters
@@ -1146,7 +1144,7 @@ apicontroller.forgetpass = async (req, res) => {
                 Otp,
                 date
             );
-            res.status(200).json({ status: true, message: "Email Sent Successfully" });
+            res.status(200).json({ status: true,showMessage: true,  message: "Email Sent Successfully" });
         } else {
             console.log("Email Not found")
             res.json({ status: false, message: "Email Not found" });
@@ -1167,9 +1165,9 @@ apicontroller.checkOtp = async (req, res) => {
         // console.log(savedOTP,'savedOTP')
 
         if (savedOTP) {
-            res.status(200).json({ status: true, user_id: savedOTP.user_id, message: "Otp Match Successfully" });
+            res.status(200).json({ status: true, user_id: savedOTP.user_id,showMessage: true,  message: "Otp Match Successfully" });
         } else {
-            res.json({ status: false, message: "Otp is Mismatch or Expiry" });
+            res.json({ status: false, showMessage: true, message: "Otp is Mismatch or Expiry" });
         }
 
     } catch (error) {
@@ -1224,9 +1222,9 @@ apicontroller.postpassword = async (req, res) => {
                 )
                     .then(updatedUser => {
                         if (updatedUser) {
-                            res.status(200).json("Password updated successfully.")
+                            res.status(200).json({showMessage: true, message: "Password updated successfully"})
                         } else {
-                            res.json("User not found.")
+                            res.json({showMessage: true, message: "no user found"})
                         }
                     })
                     .catch(error => {
@@ -2223,10 +2221,10 @@ apicontroller.notification = async (req, res) => {
                 }
             });
 
-            res.status(200).json({ 
-                message: "Notification process completed", 
-                successCount, 
-                failureCount 
+            res.status(200).json({
+                message: "Notification process completed",
+                successCount,
+                failureCount
             });
         } catch (error) {
             console.error('Error sending message:', error);

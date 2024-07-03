@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Corona Admin</title>
   <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
-   <!-- styles -->
+  <!-- styles -->
   <%- include('../partials/_styles') %>
     <!-- styles -->
 </head>
@@ -21,72 +21,83 @@
         <a class="sidebar-brand brand-logo" href="index.html"><img src="/images/logo.svg" alt="logo" /></a>
         <a class="sidebar-brand brand-logo-mini" href="index.html"><img src="/images/logo-mini.svg" alt="logo" /></a>
       </div>
-       <!-- partial:partials/_sidebar -->
+      <!-- partial:partials/_sidebar -->
       <%- include('../partials/_sidebar') %>
-    
+
     </nav>
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
       <!-- partial:partials/_navbar -->
       <%- include('../partials/_navbar') %>
-      <div class="main-panel">
-        <div class="content-wrapper">
-          <div class="page-header">
-            <h3 class="page-title">Hello, Admin Welcome </h3>
-            <nav aria-label="breadcrumb">
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Forms</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Form elements</li>
-              </ol>
-            </nav>
-          </div>
-          <div class="row">
-            <div class="col-md-6 grid-margin stretch-card">
-              <div class="card">
-                <div class="card-body">
-                  <h4 class="card-title mb-4">About Us</h4>
-               
-                  <form class="forms-sample" autocomplete="off" method="post" enctype="multipart/form-data">
-                    <div class="form-group">
-                      <label for="title">English title</label>
-                      <input type="text" class="form-control text-white" id="title" name="titleE" placeholder="English title">
-                    </div>
-                    <div class="form-group">
-                      <label for="title">Gujarati title</label>
-                      <input type="text" class="form-control text-white" id="title" name="titleG" placeholder="Gujarati title">
-                    </div>
-                    <div class="form-group">
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title">Hello, Admin Welcome </h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Form elements</li>
+                </ol>
+              </nav>
+            </div>
+            <div class="row">
+              <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title mb-4">About Us</h4>
+
+                    <form class="forms-sample" autocomplete="off" method="post" enctype="multipart/form-data">
+                      <div class="form-group">
+                        <label for="title">English title</label>
+                        <input type="text" class="form-control text-white" id="title" name="titleE"
+                          placeholder="English title">
+                      </div>
+                      <div class="form-group">
+                        <label for="title">Gujarati title</label>
+                        <input type="text" class="form-control text-white" id="title" name="titleG"
+                          placeholder="Gujarati title">
+                      </div>
+                      <!-- <div class="form-group">
                       <label for="image">Image</label>
                       <input type="file" class="form-control text-white" id="image" name="image" placeholder="Image">
+                  </div> -->
+                      <div class="form-group">
+                        <label for="image">Image</label>
+                        <input type="file" class="form-control text-white" id="image" name="image" accept="image/*">
+                        <div id="image-preview" style="max-width: 200px; margin-top: 20px;"></div>
+                        <button type="button" id="crop-button" style="display: none;">Crop Image</button>
+                      </div>
+
+                      <div class="form-group">
+                        <label for="description">English Description:</label>
+                        <textarea class="form-control" id="descriptionE" name="descriptionE"
+                          placeholder="English Description"></textarea>
+                      </div>
+                      <div class="form-group">
+                        <label for="description">Gujarati Description:</label>
+                        <textarea class="form-control" id="descriptionG" name="descriptionG"
+                          placeholder="Gujarati Description"></textarea>
+                      </div>
+
+                      <button type="submit" class="btn btn-primary me-2">Submit</button>
+                      <button class="btn btn-dark">Cancel</button>
+                    </form>
                   </div>
-                    <div class="form-group">
-                      <label for="description">English Description:</label>
-                      <textarea class="form-control" id="descriptionE" name="descriptionE" placeholder="English Description"></textarea>
-                    </div>
-                    <div class="form-group">
-                      <label for="description">Gujarati Description:</label>
-                      <textarea class="form-control" id="descriptionG" name="descriptionG" placeholder="Gujarati Description"></textarea>
-                    </div>
-                   
-                    <button type="submit" class="btn btn-primary me-2">Submit</button>
-                    <button class="btn btn-dark">Cancel</button>
-                  </form>
                 </div>
               </div>
-            </div>
-       
-        
-          </div>
-        </div>
-        <!-- content-wrapper ends -->
-        <!-- partial:../../partials/_footer.html -->
-        <%- include('../partials/_footer') %>
 
+
+            </div>
+          </div>
+          <!-- content-wrapper ends -->
+          <!-- partial:../../partials/_footer.html -->
+          <%- include('../partials/_footer') %>
+
+            <!-- partial -->
+        </div>
         <!-- partial -->
-      </div>
-      <!-- partial -->
-   
-      <!-- main-panel ends -->
+
+        <!-- main-panel ends -->
     </div>
     <!-- page-body-wrapper ends -->
   </div>
@@ -94,11 +105,138 @@
 
   <%- include('../partials/_scripts') %>
 
-   <!-- Initialize CKEditor -->
-  <script>
-    CKEDITOR.replace('descriptionE');
-    CKEDITOR.replace('descriptionG');
-  </script>
+    <!-- Initialize CKEditor -->
+    <script>
+      CKEDITOR.replace('descriptionE');
+      CKEDITOR.replace('descriptionG');
+
+
+      document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM fully loaded');
+        const imageInput = document.getElementById('image');
+        const imagePreview = document.getElementById('image-preview');
+        const cropButton = document.getElementById('crop-button');
+        let cropper;
+
+        imageInput.addEventListener('change', function (e) {
+          console.log('File selected');
+          const file = e.target.files[0];
+          const reader = new FileReader();
+
+          reader.onload = function (event) {
+            imagePreview.innerHTML = '<img src="' + event.target.result + '" id="image-to-crop">';
+            cropButton.style.display = 'block';
+
+            const image = document.getElementById('image-to-crop');
+            if (cropper) {
+              cropper.destroy();
+            }
+            cropper = new Cropper(image, {
+              aspectRatio: 1, // You can change this as needed
+              viewMode: 1,
+            });
+            console.log('Cropper initialized');
+          }
+
+          reader.readAsDataURL(file);
+        });
+
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+  console.log('DOM fully loaded');
+  const imageInput = document.getElementById('image');
+  const imagePreview = document.getElementById('image-preview');
+  const cropButton = document.getElementById('crop-button');
+  let cropper;
+
+  imageInput.addEventListener('change', function (e) {
+    console.log('File selected');
+    const file = e.target.files[0];
+    if (!file) {
+      console.error('No file selected');
+      return;
+    }
+    console.log('File type:', file.type);
+    
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+      console.log('File read successfully');
+      imagePreview.innerHTML = '<img src="' + event.target.result + '" id="image-to-crop">';
+      cropButton.style.display = 'block';
+
+      const image = document.getElementById('image-to-crop');
+      if (!image) {
+        console.error('Image element not found');
+        return;
+      }
+
+      try {
+        if (cropper) {
+          console.log('Destroying existing cropper instance');
+          cropper.destroy();
+        }
+        console.log('Initializing new cropper instance');
+        cropper = new Cropper(image, {
+          aspectRatio: 1,
+          viewMode: 1,
+        });
+        console.log('Cropper initialized successfully');
+      } catch (error) {
+        console.error('Error initializing cropper:', error);
+      }
+    }
+
+    reader.onerror = function (error) {
+      console.error('Error reading file:', error);
+    }
+
+    reader.readAsDataURL(file);
+  });
+
+  cropButton.addEventListener('click', function () {
+    console.log('Crop button clicked');
+    if (!cropper) {
+      console.error('Cropper not initialized');
+      return;
+    }
+    try {
+            const croppedCanvas = cropper.getCroppedCanvas();
+            if (!croppedCanvas) {
+              console.error('Failed to get cropped canvas');
+              return;
+            }
+
+            croppedCanvas.toBlob(function (blob) {
+              if (!blob) {
+                console.error('Failed to create blob');
+                return;
+              }
+
+              console.log('Blob created, size:', blob.size);
+              const formData = new FormData();
+              formData.append('image', blob, 'cropped-image.jpg');
+
+              // Send the cropped image to the server
+              fetch('/upload', {
+                method: 'POST',
+                body: formData
+              })
+                .then(response => response.json())
+                .then(data => {
+                  console.log('Success:', data);
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                });
+            }, 'image/jpeg');
+          } catch (error) {
+            console.error('Error during cropping:', error);
+          }
+  });
+});
+    </script>
 
 </body>
 
