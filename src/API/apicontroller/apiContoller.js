@@ -381,44 +381,65 @@ apicontroller.user_register = async (req, res) => {
 }
 
 apicontroller.profile_image = async (req, res) => {
-    var id = req.params.id
+    var id = req.params.id;
     try {
+        if (!req.files || !req.files.image) {
+            console.log("No Image uploaded")
+            return res.status(400).json({ status: false, message: "No Image uploaded", showMessage: true });
+        }
+
         let file = req.files.image;
-        file.mv("uploads/" + file.name);
-        const token = req.cookies.jwt;
+        file.mv("uploads/" + file.name, function (err) {
+            if (err) {
+                console.log("Image upload failed")
+                return res.status(500).json({ status: false, message: "Image upload failed", error: err });
+            }
+        });
 
         const updateUser = {
             photo: file.name,
-            updated_at: Date(),
+            updated_at: new Date(),
         };
-        const userData = await user.findByIdAndUpdate(id, updateUser, { new: true });
-        res.status(200).json({ userData, status: true, message: "Profile image updated successfully", showMessage: true });
-        // res.json("user register")
 
+        const userData = await user.findByIdAndUpdate(id, updateUser, { new: true });
+        console.log(userData,"Profile profile updated successfully");
+        res.status(200).json({ userData, status: true, message: "Profile updated successfully", showMessage: true });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).send(error);
     }
 }
 
+
+
 apicontroller.profile_banner = async (req, res) => {
-    var id = req.params.id
-    console.log(req.files, 'req.files')
+    var id = req.params.id;
     try {
-        let file = req.files.image;
-        file.mv("uploads/" + file.name);
+        if (!req.files || !req.files.profile_banner) {
+            console.log("No Image uploaded")
+            return res.status(400).json({ status: false, message: "No Image uploaded", showMessage: true });
+        }
+
+        let file = req.files.profile_banner;
+        file.mv("uploads/" + file.name, function (err) {
+            if (err) {
+                console.log("Image upload failed")
+                return res.status(500).json({ status: false, message: "Image upload failed", error: err });
+            }
+        });
+
         const token = req.cookies.jwt;
 
         const updateUser = {
             profile_banner: file.name,
-            updated_at: Date(),
+            updated_at: new Date(),
         };
-        const userData = await user.findByIdAndUpdate(id, updateUser, { new: true });
-        console.log(userData, 'userDatai in banner')
-        res.status(200).json({ userData, status: true, message: "Profile banner updated successfully", showMessage: true });
 
+        const userData = await user.findByIdAndUpdate(id, updateUser, { new: true });
+        console.log("Profile banner updated successfully");
+        res.status(200).json({ userData, status: true, message: "Profile banner updated successfully", showMessage: true });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).send(error);
     }
 }
@@ -894,7 +915,7 @@ apicontroller.user_delete = async (req, res) => {
         if (newsave) {
             const parent_id = newsave.parent_id
             const familyData = await user.find({ parent_id: parent_id, deleted_at: null });
-            res.status(200).json({ familyData: familyData ,showMessage: true, message: "User Deleted Successfully" });
+            res.status(200).json({ familyData: familyData, showMessage: true, message: "User Deleted Successfully" });
         }
 
     } catch (error) {
@@ -1059,7 +1080,7 @@ apicontroller.child_update = async (req, res) => {
         const findmain = await user.findOne({ _id: id });
         const parent_id = findmain.parent_id
         const childData = await user.find({ parent_id: parent_id, deleted_at: null });
-        res.status(200).json({ newsave, childData ,showMessage: true, message: "User Updated Successfully" });
+        res.status(200).json({ newsave, childData, showMessage: true, message: "User Updated Successfully" });
 
     } catch (error) {
         console.log(error)
