@@ -43,7 +43,6 @@ const Condition = require('../../model/condition')
 const { error } = require('console')
 firebase_admin.initializeApp({
     credential: firebase_admin.credential.cert(serviceAccount),
-    databaseURL: 'https://your-project-id.firebaseio.com', // Replace with your Firebase project URL
 });
 
 
@@ -2197,67 +2196,121 @@ apicontroller.news_delete = async (req, res) => {
 }
 
 
+// apicontroller.notification = async (req, res) => {
+//     var id = req.params.id
+//     try {
+//         const news_edit = await news.findOne({ _id: id });
+//         if (!news_edit) {
+//             return res.status(404).json({ message: "News item not found" });
+//         }
+
+//         const registrationTokens = await user.find({ deleted_at: null, parent_id: null });
+//         const registrationToken = registrationTokens.map((element) => element.device_token);
+//         const filteredTokens = registrationToken.filter(token => token !== null && token !== undefined);
+//         const uniqueTokens = [...new Set(filteredTokens)];
+//         console.log(filteredTokens, "filteredTokens")
+
+//         if (uniqueTokens.length === 0) {
+//             return res.status(400).json({ message: "No valid device tokens found" });
+//         }
+
+//         try {
+//             const message = {
+//                 notification: {
+//                     title: news_edit.title ? String(news_edit.title) : "New Notification",
+//                     // body: news_edit.description ? String(news_edit.description) : "",
+//                     imageUrl: 'https://codecrewinfotech.com/images/logos/logo-cc.png',
+//                 },
+//                 data: {
+//                     newsId: news_edit._id.toString(),
+//                 },
+//             };
+
+//             const response = await firebase_admin.messaging().sendToDevice(uniqueTokens, message);
+
+//             let successCount = 0;
+//             let failureCount = 0;
+
+//             response.results.forEach((result, index) => {
+//                 const error = result.error;
+//                 if (error) {
+//                     failureCount++;
+//                     console.error(`Error sending message to ${uniqueTokens[index]}:`, error);
+//                 } else {
+//                     successCount++;
+//                     console.log(`Successfully sent message to ${uniqueTokens[index]}`);
+//                 }
+//             });
+
+//             res.status(200).json({
+//                 message: "Notification process completed",
+//                 successCount,
+//                 failureCount
+//             });
+//         } catch (error) {
+//             console.error('Error sending message:', error);
+//             res.status(500).json({ error: error.message });
+//         }
+
+//     } catch (error) {
+//         console.error('Error in notification function:', error);
+//         res.status(500).json({ error: error.message });
+//     }
+// }
+
 apicontroller.notification = async (req, res) => {
-    var id = req.params.id
+    const id = req.params.id;
     try {
         const news_edit = await news.findOne({ _id: id });
         if (!news_edit) {
             return res.status(404).json({ message: "News item not found" });
         }
 
-        const registrationTokens = await user.find({ deleted_at: null, parent_id: null });
-        const registrationToken = registrationTokens.map((element) => element.device_token);
-        const filteredTokens = registrationToken.filter(token => token !== null && token !== undefined);
-        const uniqueTokens = [...new Set(filteredTokens)];
-        console.log(filteredTokens, "filteredTokens")
+        const users = await user.find({ deleted_at: null, parent_id: null });
+        const registrationTokens = users.map(user => user.device_token).filter(token => token);
+
+        const uniqueTokens = [...new Set(registrationTokens)];
 
         if (uniqueTokens.length === 0) {
             return res.status(400).json({ message: "No valid device tokens found" });
         }
 
-        try {
-            const message = {
-                notification: {
-                    title: news_edit.title ? String(news_edit.title) : "New Notification",
-                    // body: news_edit.description ? String(news_edit.description) : "",
-                    imageUrl: 'https://codecrewinfotech.com/images/logos/logo-cc.png',
-                },
-                data: {
-                    newsId: news_edit._id.toString(),
-                },
-            };
+        const message = {
+            notification: {
+                title: news_edit.title ? String(news_edit.title) : "New Notification",
+                imageUrl: 'https://codecrewinfotech.com/images/logos/logo-cc.png',
+            },
+            data: {
+                newsId: news_edit._id.toString(),
+            },
+        };
 
-            const response = await firebase_admin.messaging().sendToDevice(uniqueTokens, message);
+        const response = await firebase_admin.messaging().sendToDevice(uniqueTokens, message);
 
-            let successCount = 0;
-            let failureCount = 0;
+        let successCount = 0;
+        let failureCount = 0;
 
-            response.results.forEach((result, index) => {
-                const error = result.error;
-                if (error) {
-                    failureCount++;
-                    console.error(`Error sending message to ${uniqueTokens[index]}:`, error);
-                } else {
-                    successCount++;
-                    console.log(`Successfully sent message to ${uniqueTokens[index]}`);
-                }
-            });
+        response.results.forEach((result, index) => {
+            if (result.error) {
+                failureCount++;
+                console.error(`Error sending message to ${uniqueTokens[index]}:`, result.error);
+            } else {
+                successCount++;
+                console.log(`Successfully sent message to ${uniqueTokens[index]}`);
+            }
+        });
 
-            res.status(200).json({
-                message: "Notification process completed",
-                successCount,
-                failureCount
-            });
-        } catch (error) {
-            console.error('Error sending message:', error);
-            res.status(500).json({ error: error.message });
-        }
-
+        res.status(200).json({
+            message: "Notification process completed",
+            successCount,
+            failureCount
+        });
     } catch (error) {
         console.error('Error in notification function:', error);
         res.status(500).json({ error: error.message });
     }
-}
+};
+
 
 
 
