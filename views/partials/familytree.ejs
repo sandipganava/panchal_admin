@@ -1,0 +1,112 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Family Chart</title>
+  <script src="https://unpkg.com/d3@6"></script>
+  <script src="https://unpkg.com/family-chart"></script>
+  <link rel="stylesheet" href="../../css/family-chart.css">
+</head>
+
+<body>
+  <div id="FamilyChart" class="f3"></div>
+  <script type="module">
+    function convertData(data) {
+      const result = [];
+      const personMap = new Map();
+      let currentId = 0;
+      function createPerson(person, parentId = null) {
+        const id = `${currentId++}`;
+        const firstName = person.firstname;
+        const lastName = person.lastname;
+        const gender = person.gender === 'male' ? 'M' : 'F';
+        const avatar = 'https://static8.depositphotos.com/1009634/988/v/950/depositphotos_9883921-stock-illustration-no-user-profile-picture.jpg';
+
+        const personObj = {
+          id,
+          data: {
+            'first name': firstName,
+            'last name': lastName,
+            birthday: null,
+            avatar,
+            gender,
+          },
+          rels: {
+            children: [],
+          },
+        };
+
+        personMap.set(id, personObj);
+
+        if (parentId) {
+          const parent = personMap.get(parentId);
+          if (person.relationship === 'Wife') {
+            personObj.rels.spouses = [parentId];
+            parent.rels.spouses = [id];
+          } else {
+            const parentGender = parent.data.gender;
+            const parentSpouseId = parent.rels.spouses?.[0];
+            personObj.rels.mother = parentGender === 'F' ? parentId : parentSpouseId;
+            personObj.rels.father = parentGender === 'M' ? parentId : parentSpouseId;
+            parent.rels.children.push(id);
+          }
+        }
+
+        result.push(personObj);
+
+        if (person.wife) {
+          createPerson(person.wife, id);
+        }
+
+        if (person.children) {
+          person.children.forEach(child => createPerson(child, id));
+        }
+      }
+
+      if (Array.isArray(data)) {
+        data.forEach(item => createPerson(item));
+      } else {
+        createPerson(data);
+      }
+
+      return result;
+    }
+    function getFamilyChart(data) {
+      const store = f3.createStore({
+        data: convertData(data),
+        node_separation: 250,
+        level_separation: 150
+      });
+
+      const view = f3.d3AnimationView({
+        store,
+        cont: document.querySelector("#FamilyChart")
+      });
+
+      const Card = f3.elements.Card({
+        store,
+        svg: view.svg,
+        card_dim: { w: 220, h: 60, text_x: 75, text_y: 15, img_w: 60, img_h: 60, img_x: 5, img_y: 5 },
+        card_display: [d => `${d.data['first name'] || ''} ${d.data['last name'] || ''}`, d => `${d.data['birthday'] || ''}`],
+        mini_tree: false,
+        link_break: true
+      });
+
+      view.setCard(Card);
+      store.setOnUpdate(props => view.update(props || {}));
+      store.update.tree({ initial: true });
+    }
+
+    // Fetch family data from the API endpoint
+    fetch('/api/familyData/<%=id%>')
+      .then(response => response.json())
+      .then((data) => {
+        getFamilyChart(data)
+      })
+      .catch(error => console.error('Error fetching family data:', error));
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Registration mail</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #ffffff;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 45px 30px 60px;
+            background: #f4f7ff;
+            background-image: url(https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661497957196_595865/email-template-background-banner);
+            background-repeat: no-repeat;
+            background-size: 800px 452px;
+            background-position: top center;
+            font-size: 14px;
+            color: #434343;
+        }
+
+        header table {
+            width: 100%;
+        }
+
+        header tr {
+            height: 0;
+        }
+
+        header td:first-child img {
+            height: 25px;
+        }
+
+        header td:last-child {
+            text-align: right;
+        }
+
+        header span {
+            font-size: 16px;
+            line-height: 30px;
+            color: #ffffff;
+        }
+
+        .main {
+            margin: 0;
+            margin-top: 70px;
+            padding: 92px 30px 115px;
+            background: #ffffff;
+            border-radius: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 500;
+            color: #1f1f1f;
+        }
+
+        p {
+            margin: 0;
+            margin-top: 17px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        b {
+            font-weight: 600;
+        }
+
+        .credentials {
+            display: flex;
+            width: 100%;
+        }
+
+        .credentials b {
+            margin-bottom: 2px;
+        }
+
+        .credentials p {
+            margin-top: 0;
+            margin-left: 5px;
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                           
+                        </td>
+                        <td>
+                            <span><%= date %></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </header>
+
+        <main>
+            <div class="main">
+                <h1>Successful Registration</h1>
+                <p>Dear <%= name %>,</p>
+                <p>Your registration has been successfully completed. Thank you for joining us!</p>
+                <p>You can now access all the features and services available on our platform.</p>
+                <p>If you have any questions or need further assistance, feel free to contact us.</p>
+                <p>Best regards,</p>
+                <div class="credentials">
+                    <b>Phone Number:</b>
+                    <p><%= number %></p>
+                </div>
+                <div class="credentials">
+                    <b>Password:</b>
+                    <p><%= password %></p>
+                </div>
+                <p>The CodecrewInfoTech Team</p>
+            </div>
+        </main>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

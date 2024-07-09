@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Receipt</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .receipt-details {
+      margin-top: 20px;
+    }
+    .detail {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Payment Receipt</h1>
+    <div class="receipt-details">
+      <div class="detail">
+        <strong>Payment ID:</strong> <%= payment.id %>
+      </div>
+      <div class="detail">
+        <strong>Amount:</strong> <%= payment.amount / 100 %> <%= payment.currency %>
+      </div>
+      <!-- Add more payment details as needed -->
+    </div>
+    <p>Thank you for your payment!</p>
+  </div>
+</body>
+</html>
