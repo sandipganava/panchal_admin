@@ -4,16 +4,22 @@ const fileUpload = require('express-fileupload');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-// const flash = require('express-flash');
+const flash = require('express-flash');
 var indexRouter = require('./src/routes/index');
 var apiRouter = require('./src/API/apiroutes/apiRoutes');
+const session = require('express-session');
 
 var app = express();
 app.use(fileUpload({
   createParentPath: true
 }));
-
-// app.use(flash());
+app.use(session({
+  secret: process.env.JWT_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 60000 } 
+}));
+app.use(flash());
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

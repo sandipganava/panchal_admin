@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID Card Design</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #FFD700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .id-card {
+            display: flex;
+            flex-direction: column;
+
+            max-width: 820px;
+        }
+
+        .card {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin: 10px;
+            overflow: hidden;
+        }
+
+        .front {
+            background: white;
+            padding: 20px;
+        }
+
+        .front .details div {
+            font-size: small;
+            font-weight: 600;
+            margin: 10px 0 0 0;
+        }
+
+        .back {
+            background: #003366;
+            color: white;
+            padding: 20px;
+        }
+
+        .profile-pic {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            object-fit: contain;
+            height: 300px;
+        }
+
+        .company-logo {
+            position: absolute;
+            bottom: 110px;
+            right: 0px;
+            width: 200px;
+            height: 100px;
+            background: #003366;
+            color: #FFA500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            z-index: 0;
+            padding: 5px;
+            border-radius: 35px 0px 0px 35px;
+        }
+
+        .company-website {
+            position: absolute;
+            gap: 5px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #003366;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            text-align: center;
+            z-index: 0;
+            padding: 20px;
+        }
+
+        .company-website .company-name {
+            font-size: large;
+            color: white;
+        }
+
+        .company-website .company-url {
+            font-size: medium;
+            color: #FFA500;
+        }
+
+        .front h1,
+        .front h2,
+        .front p {
+            margin: 0;
+            padding: 0;
+        }
+
+        .front h1 {
+            margin-top: 30px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .front h2 {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #555;
+        }
+
+        .front p {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .front a {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #FFA500;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back h1,
+        .back p,
+        .back .footer {
+            margin: 0;
+        }
+
+        .back h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .back p {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .back .address,
+        .back .qr-code,
+        .back .footer {
+            margin-top: 20px;
+        }
+
+        .back .qr-code img {
+            width: 100px;
+        }
+
+        .back .footer {
+            text-align: center;
+        }
+
+        .back .footer a {
+            color: #FFA500;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>

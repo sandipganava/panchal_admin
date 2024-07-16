@@ -1175,7 +1175,7 @@ AdminController.joinpage = async (req, res) => {
         const token = req.cookies.jwt;
         const response = await helpers.axiosdata("get", "/api/joinpage");
         const joinpage = response.data;
-        res.render('pages/joinpage', {  joinpage })
+        res.render('pages/joinpage', { joinpage })
     } catch (error) {
         console.log(error)
         res.status(400).send(error);
@@ -1369,5 +1369,70 @@ AdminController.deleteTermsandcondition = async (req, res) => {
     }
 }
 
+AdminController.plans = async (req, res) => {
+    const response = await axios.get(`${baseURL}/api/getPlans/`);
+    console.log(response.data.plans, "response")
+    res.render("pages/plans", { plans: response.data.plans })
+}
+
+AdminController.businessListing = async (req, res) => {
+    const response = await axios.get(`${baseURL}/api/allBusinesses?pending=1`);
+    res.render("pages/business", { businesses: response.data.businesses })
+}
+
+AdminController.businessTemplates = async (req, res) => {
+    const { id, position } = req.params;
+    const payload = {
+        name: "Demo name",
+        role: "Demo",
+        address: "Demo",
+        businessContactNumber: 1234567890,
+        businessEmail: "panchalsamaj@gmail.com",
+        businessLogo: "https://play-lh.googleusercontent.com/1p2yNXDfrUZF6QKbvQv_0fMp-Y4QwvvylNh7bb9rfpuFYGZOmZl0Gur1WVo5h-UFKo-m=w240-h480-rw",
+        businessName: "Panchal samaj",
+        businessShortDetail: "This is panchal samaj",
+        businessLongDetail: "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Recusandae labore atque quasi doloribus vel magnam suscipit eos, odio modi veniam reiciendis excepturi corrupti maiores molestiae ex debitis tempora reprehenderit laudantium sapiente beatae accusamus libero. Nisi omnis minus rem? Porro aut na",
+        businessType: "Community",
+        dateOfOpeningJob: "16/12/2003",
+        businessWebsite: "www.samajapp.codecrewinfotech.com",
+        facebook: "www.facebook.com",
+        instagram: "www.facebook.com",
+        linkedIn: "www.facebook.com",
+        twitter: "www.facebook.com",
+        phoneNumber2: 1234567890
+    }
+    res.render(`template/card_${id}/${position}`, { payload })
+}
+
+AdminController.businesses = async (req, res) => {
+    const users = await axios.get(`${baseURL}/api/user_listing`)
+    const errorMessage = req.flash('errorBusiness')
+    res.render(`pages/addBusiness`, { users: users.data, errorMessage })
+}
+
+AdminController.addBusinesses = async (req, res) => {
+    try {
+        const form = new FormData();
+
+        Object.keys(req.body).forEach(key => {
+            form.append(key, req.body[key]);
+        });
+
+        if (req.files && req.files.businessLogo) {
+            const file = req.files.businessLogo;
+            form.append('businessLogo', fs.createReadStream(file.path), file.name);
+        }
+
+        await axios.post(`${baseURL}/api/registerBusiness`, form, {
+            headers: {
+                contentType: "multipart/form-data"
+            }
+        })
+        res.redirect('/businessListing')
+    } catch (error) {
+        req.flash('errorBusiness', error?.message);
+        res.redirect('/addBusinesses')
+    }
+}
 
 module.exports = AdminController;

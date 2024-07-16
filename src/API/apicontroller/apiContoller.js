@@ -1,4 +1,3 @@
-
 const user = require('../../model/user')
 const Faq = require('../../model/faq')
 const admin = require('../../model/admin')
@@ -41,13 +40,63 @@ const mongoose = require('mongoose');
 const Emailsupport = require('../../model/emailsupport')
 const Condition = require('../../model/condition')
 const { error } = require('console')
+const Plan = require('../../model/plans')
+const Subscription = require('../../model/subscription')
+const Business = require('../../model/business')
+const multer = require('multer')
+const { default: puppeteer } = require('puppeteer')
 firebase_admin.initializeApp({
     credential: firebase_admin.credential.cert(serviceAccount),
 });
 
+const renderTemplateToImage = async (template, data) => {
+    const dirPath = __dirname.split('\\src')[0]
+    const html = await ejs.renderFile(path.join(dirPath, 'views', `template/${template}.ejs`), data);
 
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(html);
+    await page.setViewport({
+        width: 600,
+        height: 850
+    });
 
-// Store generated OTPs temporarily (In a real-world scenario, use a database)
+    const imageBuffer = await page.screenshot();
+    await browser.close();
+    return imageBuffer
+};
+
+const renderImage = async (templatePath, outputPath, data) => {
+    const html = await ejs.renderFile(templatePath, data);
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(html);
+    await page.setViewport({
+        width: 600,
+        height: 850
+    });
+
+    const imageBuffer = await page.screenshot();
+    await browser.close();
+    await fs.writeFile(outputPath, imageBuffer);
+};
+
+const renderFrontAndBackImage = async (template, data) => {
+    const dirPath = __dirname.split('\\src')[0];
+    const uploadDir = path.join(dirPath, 'uploads');
+
+    const frontImagePath = path.join(uploadDir, `${data.payload._id}-template-front.png`);
+    const backImagePath = path.join(uploadDir, `${data.payload._id}-template-back.png`);
+
+    await renderImage(path.join(dirPath, 'views', `template/card_${template}/front.ejs`), frontImagePath, data);
+    await renderImage(path.join(dirPath, 'views', `template/card_${template}/back.ejs`), backImagePath, data);
+
+    return {
+        front: `${data.payload._id}-template-front.png`,
+        back: `${data.payload._id}-template-back.png`
+    };
+};
+
 const otpStore = {};
 
 const emailServiceConfig = {
@@ -386,7 +435,8 @@ apicontroller.profile_image = async (req, res) => {
             console.log("No Image uploaded")
             return res.status(400).json({ status: false, message: "No Image uploaded", showMessage: true });
         }
-
+        console.log(req.files, "req.filesreq.files")
+        console.log(req.body, "req.body")
         let file = req.files.image;
         file.mv("uploads/" + file.name, function (err) {
             if (err) {
@@ -401,7 +451,6 @@ apicontroller.profile_image = async (req, res) => {
         };
 
         const userData = await user.findByIdAndUpdate(id, updateUser, { new: true });
-        console.log(userData,"Profile profile updated successfully");
         res.status(200).json({ userData, status: true, message: "Profile updated successfully", showMessage: true });
     } catch (error) {
         console.log(error);
@@ -1154,12 +1203,11 @@ apicontroller.forgetpass = async (req, res) => {
                 user_id: emailExists._id
             });
 
-            const savedOTP = await otpDocument.save();
-
+            await otpDocument.save();
             const name = emailExists.firstname + ' ' + emailExists.lastname
 
             await sendEmail(
-                emailExists.email,
+                emailExists.email && emailExists.email.toLowerCase(),
                 name,
                 emailExists._id,
                 Otp,
@@ -1168,11 +1216,11 @@ apicontroller.forgetpass = async (req, res) => {
             res.status(200).json({ status: true, showMessage: true, message: "Email Sent Successfully" });
         } else {
             console.log("Email Not found")
-            res.json({ status: false, message: "Email Not found" });
+            res.status(400).json({ status: false, error: "Email Not found" });
         }
     } catch (error) {
         console.log("error", error)
-        res.status(500).send(error);
+        res.status(500).send({ error: error.message });
     }
 }
 
@@ -1186,13 +1234,15 @@ apicontroller.checkOtp = async (req, res) => {
         // console.log(savedOTP,'savedOTP')
 
         if (savedOTP) {
-            res.status(200).json({ status: true, user_id: savedOTP.user_id, showMessage: true, message: "Otp Match Successfully" });
+            res.status(200).json({
+                status: true, user_id: savedOTP.user_id, showMessage: true, message: "Otp Match Successfully"
+            });
         } else {
-            res.json({ status: false, showMessage: true, message: "Otp is Mismatch or Expiry" });
+            res.status(400).json({ error: "Otp is Mismatch or Expiry" });
         }
 
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).send({ error: error.message });
     }
 }
 
@@ -1331,7 +1381,6 @@ apicontroller.change_user_password = async (req, res) => {
 
 apicontroller.order = async (req, res) => {
     try {
-
         const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
         const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
         const razorpay = new Razorpay({
@@ -2601,9 +2650,6 @@ apicontroller.getemail_support = async (req, res) => {
     }
 }
 
-
-
-
 apicontroller.joinpage = async (req, res) => {
     try {
         const isadmin = req.headers.isadmin;
@@ -2619,7 +2665,6 @@ apicontroller.joinpage = async (req, res) => {
         res.status(500).json(error)
     }
 }
-
 
 apicontroller.createjoinpage = async (req, res) => {
     try {
@@ -2754,10 +2799,412 @@ apicontroller.deletecreateTermsandcondition = async (req, res) => {
     }
 }
 
+apicontroller.createPlans = async (req, res) => {
+    try {
+        const { interval, period, name, amount, currency, description } = req.body;
+        if (!interval || !period || !name || !amount || !currency) {
+            throw new Error('Missing required fields');
+        }
+        const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
+        const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
 
+        if (!razorpay_key_id || !razorpay_key_secret) {
+            throw new Error('Razorpay credentials not found');
+        }
 
+        const razorpay = new Razorpay({
+            key_id: razorpay_key_id.value,
+            key_secret: razorpay_key_secret.value,
+        });
+
+        const item = { name, amount: amount * 100, currency, description: description || null }
+        const payload = { interval, period, item }
+
+        const plan = await razorpay.plans.create(payload)
+
+        const planItem = {
+            name: plan.item.name,
+            amount: plan.item.amount,
+            currency: plan.item.currency,
+            description: plan.item?.description
+        }
+        const data = {
+            razorpay_plan_id: plan.id,
+            entity: plan.entity,
+            period: plan.period,
+            interval: plan.interval,
+            item: planItem,
+            created_at: plan.created_at
+        }
+        await Plan.create(data)
+
+        res.status(200).json({ message: 'Plan created successfully' })
+    } catch ({ error }) {
+        console.log(error, "Error")
+        res.status(400).json({ error: error.description || error.message })
+    }
+}
+
+apicontroller.getPlans = async (req, res) => {
+    try {
+        const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
+        const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
+        const razorpay = new Razorpay({
+            key_id: razorpay_key_id.value,
+            key_secret: razorpay_key_secret.value,
+        });
+        console.log(await razorpay.plans.all())
+        let plans = await Plan.aggregate([
+            { $match: { deleted_at: null } },
+            {
+                $project: {
+                    name: '$item.name',
+                    plan_id: '$razorpay_plan_id',
+                    interval: 1,
+                    period: {
+                        $switch: {
+                            branches: [
+                                {
+                                    case: { $eq: ["$period", "monthly"] },
+                                    then: "months"
+                                },
+                                {
+                                    case: { $eq: ["$period", "yearly"] },
+                                    then: "years"
+                                },
+                                {
+                                    case: { $eq: ["$period", "daily"] },
+                                    then: "days"
+                                },
+                                {
+                                    case: { $eq: ["$period", "weekly"] },
+                                    then: "weeks"
+                                }
+                            ],
+                            default: "Unknown period"
+                        }
+                    },
+                    price: { $divide: [{ $toDouble: "$item.amount" }, 100] }
+                }
+            }])
+        res.status(200).json({ plans })
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+
+apicontroller.createSubscription = async (req, res) => {
+    try {
+        const planId = req.body.plan_id
+        const userId = req.body.user_id
+        const businessId = req.body.business_id
+
+        const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
+        const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
+
+        if (!razorpay_key_id || !razorpay_key_secret) {
+            throw new Error('Razorpay credentials not found');
+        }
+
+        const razorpay = new Razorpay({
+            key_id: razorpay_key_id.value,
+            key_secret: razorpay_key_secret.value,
+        });
+
+        const payload = { plan_id: planId, total_count: 12, customer_notify: true, }
+        const subscription = await razorpay.subscriptions.create(payload)
+        const businessData = await Business.findById(businessId).select('name businessName businessEmail businessWebsite')
+        console.log(businessData, "businessData")
+        let planDetail = await Plan.aggregate([
+            { $match: { deleted_at: null } },
+            { $match: { razorpay_plan_id: planId } },
+            {
+                $project: {
+                    name: '$item.name',
+                    plan_id: '$razorpay_plan_id',
+                    interval: 1,
+                    price: { $divide: [{ $toDouble: "$item.amount" }, 100] }
+                }
+            }])
+        // const data = {
+        //     razorpay_subscription_id: planId,
+        //     razorpay_plan_id: planId,
+        //     total_count: payload.total_count,
+        //     user_id: userId,
+        //     business_id: businessId,
+        //     customer_notify: payload.customer_notify,
+        //     created_at: new Date()
+        // }
+        const data = {
+            razorpay_subscription_id: subscription.id,
+            razorpay_plan_id: subscription.plan_id,
+            total_count: subscription.total_count,
+            user_id: userId,
+            business_id: businessId,
+            customer_notify: subscription.customer_notify,
+            created_at: subscription.created_at
+        }
+        await Subscription.create(data)
+        res.status(200).json({ subscription_id: subscription.id, razorpay_id: razorpay_key_id.value, plan_id: subscription.plan_id, userId, businessData, planDetail })
+    } catch (error) {
+        console.log(error, "error")
+        res.status(400).json({ error: error.message })
+    }
+}
+
+apicontroller.registerBusiness = async (req, res) => {
+    try {
+        const requiredFields = [
+            "name",
+            "role",
+            "address",
+            "businessContactNumber",
+            "businessEmail",
+            "businessName",
+            "businessShortDetail",
+            "businessType",
+            "dateOfOpeningJob",
+        ];
+        for (const field of requiredFields) {
+            if (!req.body[field]) {
+                return res.status(400).json({ error: `${field} is required` });
+            }
+        }
+        if (req.files && req.files?.businessLogo) {
+            let file = req.files.businessLogo;
+            file.mv("uploads/" + file.name, function (err) {
+                if (err) {
+                    console.log("Image upload failed")
+                    return res.status(500).json({ status: false, message: "Image upload failed", error: err });
+                }
+            });
+            req.body['businessLogo'] = file.name
+        }
+
+        const businessDetail = await Business.create(req.body)
+        console.log(businessDetail, "businessDetail")
+        res.status(200).json({ businessDetail, status: true, message: "Business created", showMessage: true })
+    } catch (error) {
+        console.log(error, "ERRORS")
+        let errorMessage;
+        let field;
+        errorMessage = error?.message || ""
+        if (error.code && error.code === 11000) {
+            // Handle duplicate key error
+            field = Object.keys(error.keyPattern)[0];
+            switch (field) {
+                case "businessEmail":
+                    errorMessage = `Business email is already registered`;
+                    break;
+
+                case "name":
+                    errorMessage = `Business name is already registered`;
+                    break;
+
+                default:
+                    errorMessage = error?.message || ""
+                    break;
+            }
+
+        }
+        return res.status(400).json({ error: errorMessage, status: false });
+    }
+}
+
+apicontroller.updateBusiness = async (req, res) => {
+    try {
+        const businessId = req.params.id;
+        const updateFields = [
+            "name",
+            "role",
+            "address",
+            "businessContactNumber",
+            "businessEmail",
+            "businessName",
+            "businessShortDetail",
+            "businessType",
+            "dateOfOpeningJob",
+        ];
+
+        let updateData = {};
+        for (const field of updateFields) {
+            if (req.body[field]) {
+                updateData[field] = req.body[field];
+            }
+        }
+
+        if (req.files && req.files?.businessLogo) {
+            let file = req.files.businessLogo;
+            file.mv("uploads/" + file.name, function (err) {
+                if (err) {
+                    console.log("Image upload failed")
+                    return res.status(500).json({ status: false, message: "Image upload failed", error: err });
+                }
+            });
+            updateData['businessLogo'] = file.name;
+        }
+
+        const updatedBusiness = await Business.findByIdAndUpdate(businessId, updateData, { new: true });
+
+        if (!updatedBusiness) {
+            return res.status(404).json({ error: "Business not found", status: false });
+        }
+
+        console.log(updatedBusiness, "updatedBusiness");
+        res.status(200).json({ updatedBusiness, status: true, message: "Business updated", showMessage: true });
+    } catch (error) {
+        console.log(error, "ERRORS");
+        let errorMessage = error?.message || "";
+        let field;
+
+        if (error.code && error.code === 11000) {
+            field = Object.keys(error.keyPattern)[0];
+            switch (field) {
+                case "businessEmail":
+                    errorMessage = `Business email is already registered`;
+                    break;
+
+                case "name":
+                    errorMessage = `Business name is already registered`;
+                    break;
+
+                default:
+                    errorMessage = error?.message || "";
+                    break;
+            }
+        }
+
+        return res.status(400).json({ error: errorMessage, status: false });
+    }
+};
+
+apicontroller.activeBusiness = async (req, res) => {
+    try {
+        let paymentId = req.body.payment_id
+        let businessId = req.body.business_id
+
+        await Subscription.findOneAndUpdate({ business_id: businessId }, { payment_id: paymentId })
+        const businessDetail = await Business.findById(businessId)
+        const images = await renderFrontAndBackImage(businessDetail.template_id, { payload: businessDetail })
+        await Business.findByIdAndUpdate(businessId, { status: "completed", created_at: new Date(), images })
+
+        res.status(200).json({ message: "Business registered successfully", showMessage: true })
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+
+apicontroller.getBusiness = async (req, res) => {
+    try {
+        const id = req.params.id
+        const businessData = await Business.findOne({ deleted_at: null, _id: id })
+        res.status(200).json({ businessData })
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+
+apicontroller.allBusinesses = async (req, res) => {
+    try {
+        const payload = req.query?.pending ?
+            { deleted_at: null } :
+            { deleted_at: null, status: 'completed' }
+        const businesses = await Business.find(payload)
+        res.status(200).json({ businesses })
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+
+apicontroller.userBusinesses = async (req, res) => {
+    try {
+        const userId = req.params.user_id
+        const businesses = await Business.find({ user_id: userId, deleted_at: null })
+        res.status(200).json({ businesses })
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+
+apicontroller.businessTemplate = async (req, res) => {
+    try {
+        const payload = {
+            name: "Demo name",
+            role: "Demo",
+            address: "Demo",
+            businessContactNumber: 1234567890,
+            businessEmail: "panchalsamaj@gmail.com",
+            businessLogo: "https://play-lh.googleusercontent.com/1p2yNXDfrUZF6QKbvQv_0fMp-Y4QwvvylNh7bb9rfpuFYGZOmZl0Gur1WVo5h-UFKo-m=w240-h480-rw",
+            businessName: "Panchal samaj",
+            businessShortDetail: "This is panchal samaj",
+            businessLongDetail: "This is long description",
+            businessType: "Community",
+            dateOfOpeningJob: "16/12/2003",
+            businessWebsite: "www.samajapp.codecrewinfotech.com",
+            facebook: "www.facebook.com",
+            instagram: "www.facebook.com",
+            linkedIn: "www.facebook.com",
+            twitter: "www.facebook.com",
+            phoneNumber2: 1234567890
+        }
+        const renderTemplateToImage = async (template, data) => {
+            const dirPath = __dirname.split('\\src')[0]
+            const html = await ejs.renderFile(path.join(dirPath, 'views', `template/${template}.ejs`), data);
+
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            await page.setContent(html);
+            await page.setViewport({
+                width: 600,
+                height: 1200
+            });
+
+            const imageBuffer = await page.screenshot();
+            await browser.close();
+            await fs.writeFile(`uploads/${template.replaceAll('/', '-')}.png`, imageBuffer);
+        };
+        await renderTemplateToImage('card_1/front', { payload });
+        await renderTemplateToImage('card_1/back', { payload });
+        await renderTemplateToImage('card_2/front', { payload });
+        await renderTemplateToImage('card_2/back', { payload });
+
+        res.status(200).json({ message: "Templates created successfully" })
+    } catch (error) {
+        console.log(error, "Errorrs")
+        res.status(400).json({ error: error.message })
+    }
+}
+
+apicontroller.templateListing = async (req, res) => {
+    try {
+        const templates = [
+            { id: 1, name: `Business template 1`, image: { front: 'card_1-front.png', back: 'card_1-back.png' } },
+            { id: 2, name: `Business template 2`, image: { front: 'card_2-front.png', back: 'card_2-back.png' } }
+        ]
+        res.status(200).json({ templates })
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+
+apicontroller.businessPreview = async (req, res) => {
+    try {
+        const { id } = req.params
+        const businessData = await Business.findById(id)
+        const first_template = await renderTemplateToImage(`card_${businessData.template_id}/front`, { payload: businessData });
+        const second_template = await renderTemplateToImage(`card_${businessData.template_id}/back`, { payload: businessData });
+
+        const imageBase_1 = first_template.toString('base64');
+        const imageBase_2 = second_template.toString('base64');
+
+        res.status(200).json({
+            front: `data:image/png;base64,${imageBase_1}`,
+            back: `data:image/png;base64,${imageBase_2}`
+        })
+    } catch (error) {
+        console.log(error, "Errorrs")
+        res.status(400).json({ error: error.message })
+    }
+}
 
 module.exports = apicontroller;
-
-
-

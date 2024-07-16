@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Corona Admin</title>
+  <!-- styles -->
+  <%- include('../partials/_styles') %>
+    <!-- styles -->
+</head>
+
+<body>
+  <div class="container-scroller">
+
+    <!-- partial:partials/_sidebar -->
+    <nav class="sidebar sidebar-offcanvas" id="sidebar">
+      <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+        <a class="sidebar-brand brand-logo" href="index.html"><img src="/images/logo.svg" alt="logo" /></a>
+        <a class="sidebar-brand brand-logo-mini" href="index.html"><img src="/images/logo-mini.svg" alt="logo" /></a>
+      </div>
+      <!-- partial:partials/_sidebar -->
+      <%- include('../partials/_sidebar') %>
+
+    </nav>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_navbar -->
+      <%- include('../partials/_navbar') %>
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title"> Add business </h3>
+              <!-- <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Form elements</li>
+                </ol>
+              </nav> -->
+            </div>
+            <%if(errorMessage.length){%>
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+              <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+              <div>
+                <%=errorMessage%>
+              </div>
+            </div>
+            <%}%>
+            <div class="row">
+              <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Business info</h4>
+                    <form class="form-sample" method="post" enctype="multipart/form-data">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Business Name<span
+                                class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control text-white" placeholder="Business Name"
+                                name="businessName" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Name<span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control text-white" placeholder="Name" name="name" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Users<span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <select class="form-control text-white" name="user_id">
+                                <option value="">Select user</option>
+                                <%for(let i=0;i<users.length;i++){ let item=users[i]; %>
+                                  <option value="<%=item._id%>">
+                                    <%=item.firstname%>
+                                      <%=item.lastname%>
+                                  </option>
+                                  <%}%>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Role<span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="text" name="role" class="form-control text-white" placeholder="Role" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Address<span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <textarea type="text" name="address" class="form-control text-white"
+                                placeholder="Address"></textarea>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Contact Number<span
+                                class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="number" class="form-control text-white" name="businessContactNumber"
+                                placeholder="Contact Number" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Phone number 2</label>
+                            <div class="col-sm-9">
+                              <input type="number" class="form-control text-white" name="phoneNumber2"
+                                placeholder="Phone number 2" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Business Email<span
+                                class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="email" name="businessEmail" class="form-control text-white"
+                                placeholder="Business Email" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Business Logo</label>
+                            <div class="col-sm-9">
+                              <input type="file" name="businessLogo" class="form-control text-white"
+                                placeholder="Business Logo" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Business Short Detail<span
+                                class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control text-white" name="businessShortDetail"
+                                placeholder="Business Short Detail" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Business Long Detail</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control text-white" name="businessLongDetail"
+                                placeholder="Business Long Detail" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Business Type<span
+                                class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control text-white" name="businessType"
+                                placeholder="Business Type" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Date Of Opening Job<span
+                                class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control text-white" name="dateOfOpeningJob"
+                                placeholder="Date Of Opening Job" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Business Website</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control text-white" name="businessWebsite"
+                                placeholder="Business Website" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Templates<span class="text-danger">*</span></label>
+                            <div class="col-sm-9 d-flex gap-3">
+                              <div class="d-flex align-items-center gap-1">
+                                <input type="radio" class="template" checked value="1" name="template_id"
+                                  id="template_1">
+                                <label for="template_1">Tamplate 1</label>
+                              </div>
+                              <div class="d-flex align-items-center gap-1">
+                                <input type="radio" class="template" value="2" name="template_id" id="template_2">
+                                <label for="template_2">Tamplate 2</label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <h4 class="card-title"> Social </h4>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group row">
+                              <label for="facebook" class="col-sm-3 col-form-label">Facebook</label>
+                              <div class="col-sm-9">
+                                <textarea id="facebook" name="facebook" class="form-control text-white" rows="4"
+                                  placeholder="facebook"></textarea>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="col-md-6">
+                            <div class="form-group row">
+                              <label class="col-sm-3 col-form-label">Instagram</label>
+                              <div class="col-sm-9">
+                                <input type="text" name="instagram" class="form-control text-white"
+                                  placeholder="Instagram" />
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group row">
+                              <label class="col-sm-3 col-form-label">Twitter</label>
+                              <div class="col-sm-9">
+                                <input type="text" name="twitter" class="form-control text-white"
+                                  placeholder="Twitter" />
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group row">
+                              <label class="col-sm-3 col-form-label">linkedIn</label>
+                              <div class="col-sm-9">
+                                <input type="text" name="linkedIn" class="form-control text-white"
+                                  placeholder="LinkedIn" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="d-flex gap-1">
+                        <button type="submit" class="btn btn-primary me-2">Submit</button>
+                        <a href="/users" class="btn btn-dark">Cancel</a>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+
+              </div>
+            </div>
+            <!-- content-wrapper ends -->
+            <!-- partial:../../partials/_footer.html -->
+            <%- include('../partials/_footer') %>
+              <!-- partial -->
+          </div>
+          <!-- partial -->
+
+          <!-- main-panel ends -->
+        </div>
+        <!-- page-body-wrapper ends -->
+    </div>
+  </div>
+  <!-- container-scroller -->
+
+  <%- include('../partials/_scripts') %>
+
+</body>
+
+</html>

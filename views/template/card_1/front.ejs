@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <title>Business Card</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f9f9f9;
+        }
+
+        .card {
+            min-height: 600px;
+            width: 500px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: linear-gradient(90deg, rgba(181, 217, 240, 0.804359243697479) 0%, rgba(53, 113, 201, 1) 50%, rgba(7, 49, 196, 1) 64%, rgba(0, 37, 153, 1) 79%, rgba(29, 64, 161, 1) 94%, rgba(69, 100, 184, 1) 100%);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .logo img {
+            width: 300px;
+            height: auto;
+        }
+
+        .logo {
+            filter: drop-shadow(6px 9px 6px #696969);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            margin: 0;
+            color: #333;
+        }
+
+        h4 {
+            font-size: 1.1em;
+            margin: 0;
+            color: #666;
+            text-transform: lowercase;
+        }
+
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: column;
+            height: 100%;
+            color: white;
+            padding: 20px;
+        }
+
+        .header * {
+            color: white;
+            font-family: "Bona Nova SC", serif;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 5px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .footer h3 {
+            color: yellow;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="header">
+            <div class="logo">
+                <%if(payload.businessLogo){%>
+                    <img src="<%=payload.businessLogo%>" alt="Logo">
+                <%}%>
+            </div>
+            <div>
+                <h1>
+                    <%=payload.businessName%>
+                </h1>
+                <h4>
+                    <%=payload.role%> of <%=payload.businessName%>
+                </h4>
+            </div>
+        </div>
+        <div class="footer">
+            <h3>
+                <%=payload.businessWebsite%>
+            </h3>
+        </div>
+</body>
+
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js" defer></script>
+    <style>
+        /* Custom CSS to add padding inside table cells */
+        #usersTable td,
+        #usersTable th {
+            padding: 10px;
+            /* Adjust the padding value as needed */
+        }
+
+        .swal2-popup,
+        .swal2-modal {
+            backdrop-filter: blur(1.5px);
+        }
+
+        .swal2-popup.swal2-modal.swal2-icon-error.swal2-show>.swal2-icon.swal2-error.swal2-icon-show {
+            display: flex;
+            margin-top: 30px;
+            margin-bottom: 0;
+        }
+    </style>
+    <title>Corona Admin</title>
+    <!-- styles -->
+    <%- include('../partials/_styles') %>
+        <!-- styles -->
+</head>
+
+<body>
+    <div class="container-scroller">
+        <!-- partial:partials/_sidebar -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar">
+            <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+                <a class="sidebar-brand brand-logo" href="index.html"><img src="/images/logo.svg" alt="logo" /></a>
+                <a class="sidebar-brand brand-logo-mini" href="index.html"><img src="/images/logo-mini.svg"
+                        alt="logo" /></a>
+            </div>
+            <!-- partial:partials/_sidebar -->
+            <%- include('../partials/_sidebar') %>
+        </nav>
+        <!-- partial -->
+        <div class="container-fluid page-body-wrapper">
+            <!-- partial:partials/_navbar -->
+            <%- include('../partials/_navbar') %>
+
+                <!-- content-wrapper start -->
+                <div class="main-panel">
+                    <div class="content-wrapper">
+                        <div class="row">
+                            <div class="col-lg-12 grid-margin stretch-card">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h4 class="m-0">All Business</h4>
+                                            <a class="btn btn-success mb-3" href="/addBusinesses">+ Add Business</a>
+                                        </div>
+
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered" id="usersTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Business Name</th>
+                                                        <th>Role</th>
+                                                        <th>Business Type</th>
+                                                        <th>Business Email</th>
+                                                        <th>Business Contact</th>
+                                                        <th>Status</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <%for(let i=0;i<businesses.length;i++){ const item=businesses[i]; %>
+                                                        <tr>
+                                                            <td>
+                                                                <%=i+1%>
+                                                            </td>
+                                                            <td>
+                                                                <%=item.businessName%>
+                                                            </td>
+                                                            <td>
+                                                                <%=item.role%>
+                                                            </td>
+                                                            <td>
+                                                                <%=item.businessType%>
+                                                            </td>
+                                                            <td>
+                                                                <%=item.businessEmail%>
+                                                            </td>
+                                                            <td>
+                                                                <%=item.businessContactNumber%>
+                                                            </td>
+                                                            <td style="text-transform: capitalize;"
+                                                                class="<%= item.status == 'completed' ? 'text-success' : 'text-warning' %>">
+                                                                <%=item.status&&item.status.replace("_"," ")%>
+                                                            </td>
+                                                            <td>
+                                                                <button class=" view"
+                                                                    style="margin-right: 1rem;background: transparent;border: none;text-decoration: none;">
+                                                                    <i class="fa-solid fa-eye text-white"
+                                                                        style="font-size: 18px"></i>
+                                                                    </button>
+                                                                    <button class="edit"
+                                                                        style="margin-right: 1rem;background: transparent;border: none;text-decoration: none;">
+                                                                        <i class="fa-solid fa-edit text-primary"
+                                                                            style="font-size: 18px"></i>
+                                                                    </button>
+                                                                    <button class="delete"
+                                                                        style="margin-right: 1rem;background: transparent;border: none;text-decoration: none;">
+                                                                        <i class="fa-solid fa-trash text-danger"
+                                                                            style="font-size: 18px"></i>
+                                                                    </button>
+                                                            </td>
+                                                        </tr>
+                                                        <%}%>
+                                                            <%if(!businesses.length){%>
+                                                                <tr>
+                                                                    <td colspan="99" align="center">
+                                                                        <h3 style="margin-bottom: 0;">No data found</h3>
+                                                                    </td>
+                                                                </tr>
+                                                                <%}%>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- content-wrapper ends -->
+                    <!-- partial:../../partials/_footer.html -->
+                    <%- include('../partials/_footer') %>
+                        <!-- partial -->
+                </div>
+                <!-- main-panel ends -->
+        </div>
+        <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+    <script>
+        $(document).ready(function () {
+            $('.delete').click(function () {
+                Swal.fire({
+                    title: `Are you sure want to delete this plan?`,
+                    text: "You won't be able to revert this!",
+                    icon: "error",
+                    showCancelButton: true,
+                    color: '#252525',
+                    background: '#ddda',
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: "Deleted!",
+                            text: "Your file has been deleted.",
+                            icon: "success"
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    <%- include('../partials/_scripts') %>
+</body>
+
+</html>

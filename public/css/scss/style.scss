@@ -1,0 +1,215 @@
+/*------------------*
+ * Global variables *
+ *------------------*/
+// The official UK business card size.
+// @link: https://www.ne14design.co.uk/articles/business-card-dimensions.htm
+$card-ratio: 55 / 85 !default;
+
+// Settings.
+$card-width: 420px !default;
+$card-height: $card-width * $card-ratio !default;
+
+$corner-size: 12px !default;
+$icon-size: 80px !default;
+
+// Colours.
+$colour-bg: #333 !default;
+$colour-card-bg: #302f34 !default;
+$colour-gold: #d4cd96 !default;
+
+/*------------*
+ * CSS Styles *
+ *------------*/
+*,
+*:before,
+*:after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+    align-items: center;
+    background: linear-gradient(135deg, lighten($colour-bg, 5), $colour-bg);
+    background-color: $colour-bg;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.card {
+    color: $colour-gold;
+    font-family: 'Fira Sans', sans-serif;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    transform-origin: 100% 50%;
+    transform-style: preserve-3d;
+    width: 100%;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    transition: transform .6s cubic-bezier(.49, .23, .58, .49);
+    
+    &.flipped {
+        transform: translateX(-100%) rotateY(-180deg);
+    }
+}
+
+.card-front,
+.card-back {
+    backface-visibility: hidden;
+    background: repeating-linear-gradient(135deg,
+        rgba(darken($colour-card-bg, 50), .3),
+        transparent 1px,
+        rgba(darken($colour-card-bg, 50), .3) 2px
+    );
+    background-size: 3px 3px;
+    background-color: $colour-card-bg;
+    border-radius: 1px;
+    box-shadow: 0px -6px 8px 0px rgba(#000, .1),
+        0px 6px 8px 0px rgba(#000, .1),
+        6px 0px 8px 0px rgba(#000, .1),
+        -6px 0px 8px 0px rgba(#000, .1);
+    cursor: pointer;
+    height: 100%;
+    left: 0;
+    padding: 5%;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+.card-back {
+    transform: rotateY(180deg);
+
+    .layer {
+        background: repeating-linear-gradient(135deg,
+            rgba(darken($colour-gold, 50), .3),
+            transparent 1px,
+            rgba(darken($colour-gold, 50), .3) 2px
+        );
+        background-size: 3px 3px;
+        background-color: $colour-gold;
+        color: $colour-card-bg;
+        height: 100%;
+        position: relative;
+        width: 100%;
+
+        &:after {
+            background: linear-gradient(135deg, rgba(#000, .2), transparent);
+            content: '';
+            display: block;
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+        }
+
+        .top,
+        .bottom {
+            left: 8%;
+            position: absolute;
+            z-index: 1;
+        }
+
+        .top    { top: 12%; }
+        .bottom { bottom: 12%; }
+
+        h2, h3, h4 {
+            font-weight: 400;
+            margin: 2px 0;
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        h3 {
+            font-size: 16px;
+        }
+
+        h4 {
+            font-size: 16px;
+            font-style: italic;
+        }
+    }
+}
+
+.card-front {
+    .layer {
+        backface-visibility: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: center;
+        position: relative;
+        width: 100%;
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 400;
+            letter-spacing: -2px;
+            margin: 0 auto;
+            padding: 6px 18px 4px;
+            text-align: center;
+        }
+
+        .corner {
+            backface-visibility: hidden;
+            border-right: 2px solid $colour-gold;
+            border-top: 2px solid $colour-gold;
+            height: $corner-size;
+            position: absolute;
+            width: $corner-size;
+            
+            &:nth-of-type(1) {
+                right: 0;
+                top: 0;
+            }
+            
+            &:nth-of-type(2) {
+                left: 0;
+                top: 0;
+                transform: rotateZ(-90deg);
+            }
+            
+            &:nth-of-type(3) {
+                bottom: 0;
+                left: 0;
+                transform: rotateZ(180deg);
+            }
+            
+            &:nth-of-type(4) {
+                bottom: 0;
+                right: 0;
+                transform: rotateZ(90deg);
+            }
+        }
+    }
+}
+
+.card-wrapper {
+    height: $card-height;
+    max-width: $card-width;
+    perspective: 600px;
+    position: relative;
+    width: 100%;
+    transition: transform 1s;
+}

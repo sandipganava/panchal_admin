@@ -22,6 +22,7 @@ const storage = multer.diskStorage({
     cb(null, '../../uploads/');
   },
   filename: function (req, file, cb) {
+    console.log(file.originalname, "file.originalname")
     cb(null, file.originalname);
   }
 });
@@ -35,14 +36,14 @@ apirouter.post('/userlogin', user.userlogin);
 apirouter.post('/adduser', upload.array('photo', 1), user.adduser);
 apirouter.post('/user_register', user.user_register);
 apirouter.post('/profile_image/:id', user.profile_image);
-apirouter.post('/profile_banner/:id',  user.profile_banner);
+apirouter.post('/profile_banner/:id', user.profile_banner);
 
 apirouter.post('/search', checkApiKey, user.search);
 apirouter.post('/villagebyuser', checkApiKey, user.villageByUser);
 apirouter.post('/addchildUser/:id', user.addchildUser);
 apirouter.post('/addfamily/:id', user.addfamily);
-apirouter.get('/user-list',  user.user_list); // for app site listing
-apirouter.get('/user_listing',  user.user_listing); // for admin site listing
+apirouter.get('/user-list', user.user_list); // for app site listing
+apirouter.get('/user_listing', user.user_listing); // for admin site listing
 apirouter.get('/all-user', user.all_user);
 apirouter.get('/admin-list', user.admin_list);
 apirouter.post('/admin-delete/:id', user.admin_delete);
@@ -81,7 +82,7 @@ apirouter.post('/location-edit/:id', user.location_update);
 apirouter.post('/location-delete/:id', user.location_delete);
 
 apirouter.post('/aboutus', user.aboutus);
-apirouter.get('/aboutus',  user.listaboutus);
+apirouter.get('/aboutus', user.listaboutus);
 apirouter.post('/delete_aboutus/:id', user.delete_aboutus);
 apirouter.get('/aboutus-edit/:id', user.aboutus_edit);
 apirouter.post('/aboutus-edit/:id', user.aboutus_update);
@@ -153,10 +154,26 @@ apirouter.post('/editjoinpage/:id', user.updatejoinpage);
 apirouter.post('/deletejoinpage/:id', user.deletejoinpage);
 
 // terms and condition
-apirouter.get('/termsandcondition',  user.termsandcondition);
-apirouter.post('/createTermsandcondition',  user.createTermsandcondition);
-apirouter.get('/editTermsandcondition/:id',  user.editcreateTermsandcondition);
-apirouter.post('/editTermsandcondition/:id',  user.updatecreateTermsandcondition);
-apirouter.get('/deleteTermsandcondition/:id',  user.deletecreateTermsandcondition);
+apirouter.get('/termsandcondition', user.termsandcondition);
+apirouter.post('/createTermsandcondition', user.createTermsandcondition);
+apirouter.get('/editTermsandcondition/:id', user.editcreateTermsandcondition);
+apirouter.post('/editTermsandcondition/:id', user.updatecreateTermsandcondition);
+apirouter.get('/deleteTermsandcondition/:id', user.deletecreateTermsandcondition);
+
+apirouter.get('/getPlans', user.getPlans);
+apirouter.post('/createPlans', user.createPlans);
+apirouter.post('/createSubscriptions', user.createSubscription);
+apirouter.post('/registerBusiness', user.registerBusiness);
+apirouter.get('/getBusiness/:id', user.getBusiness);
+apirouter.post('/editBusiness/:id', user.updateBusiness);
+apirouter.post('/activeBusiness', user.activeBusiness);
+
+apirouter.get('/userBusinesses/:user_id', user.userBusinesses)
+apirouter.get('/allBusinesses', user.allBusinesses)
+apirouter.get('/businessTemplate', user.businessTemplate)
+apirouter.get('/businessPreview/:id', user.businessPreview)
+
+apirouter.get('/templateListing', user.templateListing)
+
 
 module.exports = apirouter;

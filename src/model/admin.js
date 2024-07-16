@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 
 
 const AdminSchema = mongoose.Schema({
- 
+
     firstname: {
         type: String,
     },
@@ -15,7 +15,7 @@ const AdminSchema = mongoose.Schema({
     password: {
         type: String,
     },
-  
+
     personal_email: {
         type: String,
     },
@@ -49,7 +49,6 @@ AdminSchema.methods.genrateToken = async function () {
         this.token = token;
         await this.save();
         return token;
-        console.log(token);
     } catch (e) {
         console.log(e);
     }

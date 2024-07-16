@@ -112,7 +112,7 @@
     else {
       document.querySelector('#proBanner').classList.add('d-none');
     }
-    document.querySelector('#bannerClose').addEventListener('click',function() {
+    document.querySelector('#bannerClose')?.addEventListener('click',function() {
       document.querySelector('#proBanner').classList.add('d-none');
       document.querySelector('#proBanner').classList.remove('d-flex');
       var date = new Date();

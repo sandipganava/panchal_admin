@@ -1,0 +1,34 @@
+<%-include('../../partials/_template_header2')%>
+    <div class="card front">
+        <%if(payload.businessLogo){%>
+            <img src="<%=payload.businessLogo%>" alt="Profile Picture" class="profile-pic">
+        <%}%>
+        <div class="details">
+            <h1>
+                <%=payload.name%>
+            </h1>
+            <h2>
+                <%=payload.role%> of <%=payload.businessName%>
+            </h2>
+            <div>
+                +91 <%=payload.businessContactNumber%><%=!!payload.phoneNumber2?", +91 "+ payload.phoneNumber2:""%>
+            </div>
+            <div>
+                <%=payload.mail%>
+            </div>
+        </div>
+        <!-- <div style="position: absolute;bottom: 0; width: 100%;left: 0;display: flex;"> -->
+        <div class="company-website">
+            <!-- <a href="https://<%=payload.businessWebsite%>"> -->
+            <span class="company-name"><%=payload.businessName%></span>
+            <span class="company-url">
+                <%=payload.businessWebsite%>
+            </span>
+            <!-- </a> -->
+        </div>
+        <!-- </div> -->
+         
+    </div>
+    </body>
+
+    </html>
