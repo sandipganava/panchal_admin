@@ -40,6 +40,28 @@
   function confirmDelete() {
     return confirm('Are you sure you want to delete this item?');
   }
+
+  const recurring = document.querySelector('input[name="is_recurring"]')
+  recurring.addEventListener('change', (e) => {
+    const interval = document.querySelector('input[name="interval"]')
+    const period = document.querySelector('input[name="period"]')
+
+    const intervalParent = interval.parentNode.parentNode.parentNode
+    const periodParent = period.parentNode.parentNode.parentNode
+
+    if (!e.target.checked) {
+      console.log(period, interval)
+      intervalParent.classList.add('d-none')
+      periodParent.classList.add('d-none')
+      interval.value = 0
+      period.value = 'one_time'
+      console.log(period.value, "period.value")
+    } else {
+      intervalParent.classList.remove('d-none')
+      periodParent.classList.remove('d-none')
+      period.target.value = ''
+    }
+  })
 </script>
 <!-- endinject -->
 <!-- Custom js for this page -->

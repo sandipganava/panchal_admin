@@ -45,6 +45,11 @@ const Subscription = require('../../model/subscription')
 const Business = require('../../model/business')
 const multer = require('multer')
 const { default: puppeteer } = require('puppeteer')
+const crypto = require('crypto')
+const BusinessOrder = require('../../model/businessOrder')
+const { getTargetDate } = require('../../utils/helper')
+const moment = require('moment')
+const Locations = require('../../model/location')
 firebase_admin.initializeApp({
     credential: firebase_admin.credential.cert(serviceAccount),
 });
@@ -58,7 +63,7 @@ const renderTemplateToImage = async (template, data) => {
     await page.setContent(html);
     await page.setViewport({
         width: 600,
-        height: 850
+        height: 1000
     });
 
     const imageBuffer = await page.screenshot();
@@ -73,12 +78,12 @@ const renderImage = async (templatePath, outputPath, data) => {
     await page.setContent(html);
     await page.setViewport({
         width: 600,
-        height: 850
+        height: 1000
     });
 
     const imageBuffer = await page.screenshot();
     await browser.close();
-    await fs.writeFile(outputPath, imageBuffer);
+    await fs.writeFile(outputPath, imageBuffer, { flag: 'w' });
 };
 
 const renderFrontAndBackImage = async (template, data) => {
@@ -766,7 +771,7 @@ apicontroller.add_childUser = async (req, res) => {
 apicontroller.addfamily = async (req, res) => {
     const parentId = req.params.id;
     const childData = req.body;
-    // console.log(childData, "childData from api")
+    console.log(childData, "childData from api")
     try {
 
         const newUser = new user({
@@ -1084,10 +1089,12 @@ apicontroller.user_update = async (req, res) => {
         };
 
         const newsave = await user.findByIdAndUpdate(id, updateUser, { new: true });
-        res.status(200).json({ newsave, showMessage: true, message: "User Updated Successfully" });
+        const location = await Locations.findById(newsave.locations_id).exec();
+        const userData = { ...JSON.parse(JSON.stringify(newsave)), location };
+        res.status(200).json({ userData, showMessage: true, status: true, message: "User Updated Successfully" });
 
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).send({ error: error.message });
     }
 }
 
@@ -1249,28 +1256,23 @@ apicontroller.checkOtp = async (req, res) => {
 apicontroller.updatePassword = async (req, res) => {
     try {
 
-        const newPassword = req.body.password;
-        const cfmPassword = req.body.cfmPassword;
+        const newPassword = req.body.newPassword;
+        const cfmPassword = req.body.confirmPassword;
         const userId = req.params.id;
-
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-        if (newPassword !== cfmPassword) {
-            return res.json({ status: 0, message: "Passwords do not match" });
-        }
+        console.log(req.body, "dsdsdsdsds")
+        if (!userId) return res.status(401).json({ error: "Oops! Something went wrong. Please try again." })
+        if (newPassword !== cfmPassword) throw new Error("Passwords do not match");
 
         const userData = await user.findById(userId);
+        if (!userData) throw new Error("User not found")
 
-        if (!userData) {
-            return res.status(404).json({ status: 0, message: "User not found" });
-        }
-
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         await user.findByIdAndUpdate(userId, { password: hashedPassword });
 
-        res.json({ status: true, message: "Password updated successfully" });
+        res.status(200).json({ status: true, message: "Password updated successfully", showMessage: true });
 
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).json({ error: error.message, status: false });
     }
 }
 
@@ -1388,7 +1390,6 @@ apicontroller.order = async (req, res) => {
             key_secret: razorpay_key_secret.value,
         });
 
-        console.log(razorpay, "razorpaydata")
         const amount = await Settings.findOne({ deleted_at: null, key: "amount" });
         const username = req.body.firstname;
         const application = req.body.personal_id;
@@ -1406,18 +1407,11 @@ apicontroller.order = async (req, res) => {
             },
         };
 
-        try {
-            const order = await razorpay.orders.create(options);
-            const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
-            res.status(200).json({ order, razorpay_key_id: razorpay_key_id.value });
-        } catch (error) {
-            console.log("error", error)
-            res.status(500).json({ error: error.message });
-        }
-
+        const order = await razorpay.orders.create(options);
+        res.status(200).json({ order, razorpay_key_id: razorpay_key_id.value });
     } catch (error) {
-        console.log("errors", error)
-        res.status(500).send(error);
+        console.log("error", error)
+        res.status(500).json({ error: error.message });
     }
 }
 
@@ -2057,6 +2051,7 @@ apicontroller.download = async (req, res) => {
         }
     });
 }
+
 apicontroller.test = async (req, res) => {
     try {
         const userData = await user.find()
@@ -2065,6 +2060,7 @@ apicontroller.test = async (req, res) => {
         res.status(500).json(error)
     }
 }
+
 apicontroller.changePassword = async (req, res) => {
     try {
         const MobileNumber = req.body.mobile_number
@@ -2147,8 +2143,6 @@ apicontroller.checkMobileNo = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 }
-
-
 
 apicontroller.news = async (req, res) => {
     try {
@@ -2801,47 +2795,64 @@ apicontroller.deletecreateTermsandcondition = async (req, res) => {
 
 apicontroller.createPlans = async (req, res) => {
     try {
-        const { interval, period, name, amount, currency, description } = req.body;
-        if (!interval || !period || !name || !amount || !currency) {
-            throw new Error('Missing required fields');
-        }
-        const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
-        const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
+        const { interval, period, name, amount, currency, description, is_recurring = true } = req.body;
+        let data;
+        console.log(is_recurring, "is_recurring")
+        if (is_recurring) {
+            if (!interval || !period || !name || !amount || !currency) {
+                throw new Error('Missing required fields');
+            }
+            const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
+            const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
 
-        if (!razorpay_key_id || !razorpay_key_secret) {
-            throw new Error('Razorpay credentials not found');
-        }
+            if (!razorpay_key_id || !razorpay_key_secret) {
+                throw new Error('Razorpay credentials not found');
+            }
+            const razorpay = new Razorpay({
+                key_id: razorpay_key_id.value,
+                key_secret: razorpay_key_secret.value,
+            });
 
-        const razorpay = new Razorpay({
-            key_id: razorpay_key_id.value,
-            key_secret: razorpay_key_secret.value,
-        });
+            const item = { name, amount: amount * 100, currency, description: description || null }
+            const payload = { interval, period, item }
 
-        const item = { name, amount: amount * 100, currency, description: description || null }
-        const payload = { interval, period, item }
-
-        const plan = await razorpay.plans.create(payload)
-
-        const planItem = {
-            name: plan.item.name,
-            amount: plan.item.amount,
-            currency: plan.item.currency,
-            description: plan.item?.description
-        }
-        const data = {
-            razorpay_plan_id: plan.id,
-            entity: plan.entity,
-            period: plan.period,
-            interval: plan.interval,
-            item: planItem,
-            created_at: plan.created_at
+            const plan = await razorpay.plans.create(payload)
+            const planItem = {
+                name: plan.item.name,
+                amount: plan.item.amount,
+                currency: plan.item.currency,
+                description: plan.item?.description
+            }
+            data = {
+                razorpay_plan_id: plan.id,
+                entity: plan.entity,
+                period: plan.period,
+                interval: plan.interval,
+                item: planItem,
+                created_at: plan.created_at
+            }
+        } else {
+            const planItem = {
+                name,
+                amount: amount * 100,
+                currency: currency || "INR",
+                description
+            }
+            data = {
+                razorpay_plan_id: null,
+                entity: "plan",
+                period: 'one_time',
+                interval: 0,
+                item: planItem,
+                created_at: Date.now()
+            }
         }
         await Plan.create(data)
 
         res.status(200).json({ message: 'Plan created successfully' })
-    } catch ({ error }) {
+    } catch (error) {
         console.log(error, "Error")
-        res.status(400).json({ error: error.description || error.message })
+        res.status(400).json({ error: error?.error?.description || error?.message })
     }
 }
 
@@ -2860,7 +2871,22 @@ apicontroller.getPlans = async (req, res) => {
                 $project: {
                     name: '$item.name',
                     plan_id: '$razorpay_plan_id',
-                    interval: 1,
+                    is_recurring: 1,
+                    interval: {
+                        $switch: {
+                            branches: [
+                                {
+                                    case: { $eq: ["$is_recurring", false] },
+                                    then: "$$REMOVE"
+                                },
+                                {
+                                    case: { $eq: ["$is_recurring", true] },
+                                    then: "$interval"
+                                }
+                            ],
+                            default: "Unknown interval"
+                        }
+                    },
                     period: {
                         $switch: {
                             branches: [
@@ -2879,6 +2905,10 @@ apicontroller.getPlans = async (req, res) => {
                                 {
                                     case: { $eq: ["$period", "weekly"] },
                                     then: "weeks"
+                                },
+                                {
+                                    case: { $eq: ["$period", "one_time"] },
+                                    then: "Life time"
                                 }
                             ],
                             default: "Unknown period"
@@ -2945,7 +2975,14 @@ apicontroller.createSubscription = async (req, res) => {
             created_at: subscription.created_at
         }
         await Subscription.create(data)
-        res.status(200).json({ subscription_id: subscription.id, razorpay_id: razorpay_key_id.value, plan_id: subscription.plan_id, userId, businessData, planDetail })
+        res.status(200).json({
+            subscription_id: subscription.id,
+            razorpay_id: razorpay_key_id.value,
+            plan_id: subscription.plan_id,
+            userId,
+            businessData,
+            planDetail
+        })
     } catch (error) {
         console.log(error, "error")
         res.status(400).json({ error: error.message })
@@ -2955,6 +2992,7 @@ apicontroller.createSubscription = async (req, res) => {
 apicontroller.registerBusiness = async (req, res) => {
     try {
         const requiredFields = [
+            "user_id",
             "name",
             "role",
             "address",
@@ -2970,22 +3008,26 @@ apicontroller.registerBusiness = async (req, res) => {
                 return res.status(400).json({ error: `${field} is required` });
             }
         }
+
         if (req.files && req.files?.businessLogo) {
             let file = req.files.businessLogo;
-            file.mv("uploads/" + file.name, function (err) {
+            const fileName = file.name + Date.now()
+            file.mv("uploads/" + fileName, function (err) {
                 if (err) {
                     console.log("Image upload failed")
                     return res.status(500).json({ status: false, message: "Image upload failed", error: err });
                 }
             });
-            req.body['businessLogo'] = file.name
+            req.body['businessLogo'] = fileName
+        } else {
+            throw new Error("Logo is required")
         }
-
+        const dataExist = await Business.countDocuments({ user_id: req.body.user_id, deleted_at: null })
+        if (dataExist) throw new Error('Business card already exists for this user')
         const businessDetail = await Business.create(req.body)
-        console.log(businessDetail, "businessDetail")
         res.status(200).json({ businessDetail, status: true, message: "Business created", showMessage: true })
     } catch (error) {
-        console.log(error, "ERRORS")
+        console.log(error?.message, "error?.message")
         let errorMessage;
         let field;
         errorMessage = error?.message || ""
@@ -2993,19 +3035,17 @@ apicontroller.registerBusiness = async (req, res) => {
             // Handle duplicate key error
             field = Object.keys(error.keyPattern)[0];
             switch (field) {
-                case "businessEmail":
-                    errorMessage = `Business email is already registered`;
+                case "user_id":
+                    errorMessage = `A business with this user is already exists.`;
                     break;
-
-                case "name":
-                    errorMessage = `Business name is already registered`;
+                case "businessEmail":
+                    errorMessage = `Business email is already registered.`;
                     break;
 
                 default:
                     errorMessage = error?.message || ""
                     break;
             }
-
         }
         return res.status(400).json({ error: errorMessage, status: false });
     }
@@ -3026,13 +3066,12 @@ apicontroller.updateBusiness = async (req, res) => {
             "dateOfOpeningJob",
         ];
 
-        let updateData = {};
         for (const field of updateFields) {
-            if (req.body[field]) {
-                updateData[field] = req.body[field];
+            if (!req.body[field]) {
+                throw new Error(`${field} is required`)
             }
         }
-
+        let updateData = req.body;
         if (req.files && req.files?.businessLogo) {
             let file = req.files.businessLogo;
             file.mv("uploads/" + file.name, function (err) {
@@ -3045,13 +3084,15 @@ apicontroller.updateBusiness = async (req, res) => {
         }
 
         const updatedBusiness = await Business.findByIdAndUpdate(businessId, updateData, { new: true });
-
         if (!updatedBusiness) {
             return res.status(404).json({ error: "Business not found", status: false });
         }
-
-        console.log(updatedBusiness, "updatedBusiness");
-        res.status(200).json({ updatedBusiness, status: true, message: "Business updated", showMessage: true });
+        res.status(200).json({
+            updatedBusiness,
+            status: true,
+            message: "Business updated",
+            showMessage: true,
+        });
     } catch (error) {
         console.log(error, "ERRORS");
         let errorMessage = error?.message || "";
@@ -3082,11 +3123,13 @@ apicontroller.activeBusiness = async (req, res) => {
     try {
         let paymentId = req.body.payment_id
         let businessId = req.body.business_id
-
-        await Subscription.findOneAndUpdate({ business_id: businessId }, { payment_id: paymentId })
-        const businessDetail = await Business.findById(businessId)
-        const images = await renderFrontAndBackImage(businessDetail.template_id, { payload: businessDetail })
-        await Business.findByIdAndUpdate(businessId, { status: "completed", created_at: new Date(), images })
+        let is_recurring = Boolean(req.body.is_recurring)
+        if (is_recurring) {
+            await Subscription.findOneAndUpdate({ business_id: businessId }, { payment_id: paymentId })
+        } else {
+            await BusinessOrder.findOneAndUpdate({ business_id: businessId }, { payment_id: paymentId, status: 'paid' })
+        }
+        await Business.findByIdAndUpdate(businessId, { status: "completed", created_at: Date.now(), is_recurring: !!is_recurring })
 
         res.status(200).json({ message: "Business registered successfully", showMessage: true })
     } catch (error) {
@@ -3103,13 +3146,21 @@ apicontroller.getBusiness = async (req, res) => {
         res.status(400).json({ error: error.message })
     }
 }
-
 apicontroller.allBusinesses = async (req, res) => {
     try {
+        const today = new Date()
         const payload = req.query?.pending ?
             { deleted_at: null } :
-            { deleted_at: null, status: 'completed' }
+            {
+                deleted_at: null,
+                status: { $in: ['completed', 'cancelled'] },
+                $or: [
+                    { expired_at: null },
+                    { expired_at: { $lt: today } }
+                ]
+            }
         const businesses = await Business.find(payload)
+
         res.status(200).json({ businesses })
     } catch (error) {
         res.status(400).json({ error: error.message })
@@ -3119,7 +3170,7 @@ apicontroller.allBusinesses = async (req, res) => {
 apicontroller.userBusinesses = async (req, res) => {
     try {
         const userId = req.params.user_id
-        const businesses = await Business.find({ user_id: userId, deleted_at: null })
+        const businesses = await Business.findOne({ user_id: userId, deleted_at: null })
         res.status(200).json({ businesses })
     } catch (error) {
         res.status(400).json({ error: error.message })
@@ -3178,8 +3229,9 @@ apicontroller.businessTemplate = async (req, res) => {
 apicontroller.templateListing = async (req, res) => {
     try {
         const templates = [
-            { id: 1, name: `Business template 1`, image: { front: 'card_1-front.png', back: 'card_1-back.png' } },
-            { id: 2, name: `Business template 2`, image: { front: 'card_2-front.png', back: 'card_2-back.png' } }
+            { id: 1, name: `BusinessTemplate1` },
+            { id: 2, name: `BusinessTemplate2` },
+            { id: 3, name: `BusinessTemplate3` }
         ]
         res.status(200).json({ templates })
     } catch (error) {
@@ -3190,20 +3242,209 @@ apicontroller.templateListing = async (req, res) => {
 apicontroller.businessPreview = async (req, res) => {
     try {
         const { id } = req.params
-        const businessData = await Business.findById(id)
-        const first_template = await renderTemplateToImage(`card_${businessData.template_id}/front`, { payload: businessData });
-        const second_template = await renderTemplateToImage(`card_${businessData.template_id}/back`, { payload: businessData });
-
-        const imageBase_1 = first_template.toString('base64');
-        const imageBase_2 = second_template.toString('base64');
-
-        res.status(200).json({
-            front: `data:image/png;base64,${imageBase_1}`,
-            back: `data:image/png;base64,${imageBase_2}`
-        })
+        let businessDetail = await Business.findById(id);
+        const cleanedBusinessDetail = businessDetail.toObject();
+        let data = { ...cleanedBusinessDetail, businessLogo: `${process.env.IMAGE_URL}${cleanedBusinessDetail.businessLogo}` }
+        const images = await renderFrontAndBackImage(data.template_id, { payload: data })
+        res.json({ images })
     } catch (error) {
         console.log(error, "Errorrs")
         res.status(400).json({ error: error.message })
+    }
+}
+
+apicontroller.deleteBusiness = async (req, res) => {
+    try {
+        const id = req.params.id
+        const businessData = await Business.findOne({ _id: id, deleted_at: null })
+        console.log(businessData, "businessData && businessData.is_recurring")
+        if (businessData && businessData.is_recurring) {
+            const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
+            const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
+            const razorpay = new Razorpay({
+                key_id: razorpay_key_id.value,
+                key_secret: razorpay_key_secret.value,
+            });
+
+            const subscriptionDetail = await Subscription.findOne({ deleted_at: null, business_id: id });
+            console.log(subscriptionDetail, "subscriptionDetail")
+            const data = await razorpay.subscriptions.cancel(subscriptionDetail.razorpay_subscription_id);
+            console.log(data, "data")
+        } else {
+            await BusinessOrder.findOneAndUpdate({ business_id: id, deleted_at: null, payment_id: { $ne: null } }, { deleted_at: null })
+        }
+        const data = await Business.findOneAndUpdate(
+            { _id: id, status: { $in: ['completed', 'payment_failed'] } },
+            { deleted_at: Date.now() },
+            { new: true }
+        );
+        if (!data) throw new Error("Unable to delete this business card")
+        res.status(200).json({ message: "Business card deleted successfully", showMessage: true })
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+
+apicontroller.cancelSubscription = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
+        const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
+        const razorpay = new Razorpay({
+            key_id: razorpay_key_id.value,
+            key_secret: razorpay_key_secret.value,
+        });
+
+        const subscriptionDetail = await Subscription.findOne({ business_id: id, deleted_at: null });
+        const getPlanDetails = await Plan.findOne({ razorpay_plan_id: subscriptionDetail.razorpay_plan_id })
+
+        const getExpiredDate = getTargetDate(getPlanDetails.period, subscriptionDetail.created_at, getPlanDetails.interval);
+        await razorpay.subscriptions.cancel(subscriptionDetail.razorpay_subscription_id);
+        await Business.findOneAndUpdate({ _id: id, deleted_at: null }, { status: "cancelled", expired_at: getExpiredDate.toLocaleString() });
+
+        subscriptionDetail.deleted_at = new Date();
+        subscriptionDetail.save();
+
+        res.status(200).json({ message: 'Business subscription cancelled successfully', showMessage: true })
+    } catch (err) {
+        if (Object.keys(err).find(item => item == "statusCode")) {
+            res.status(400).json({ error: err.error.description })
+        } else {
+            res.status(400).json({ error: err.message })
+        }
+    }
+}
+
+apicontroller.businessOrder = async (req, res) => {
+    try {
+        const planId = req.params.id
+        const businessId = req.body.business_id
+        const userId = req.body.user_id
+        const planDetails = await Plan.findById(planId)
+
+        await BusinessOrder.findOneAndDelete({
+            business_id: businessId,
+            status: { $ne: "paid" },
+            payment_id: null,
+            deleted_at: null
+        });
+
+        // const isExistingOrder = 
+        const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
+        const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
+        const razorpay = new Razorpay({
+            key_id: razorpay_key_id.value,
+            key_secret: razorpay_key_secret.value,
+        });
+        const userData = await user.findById(userId).select('firstname personal_id mobile_number')
+
+        const amount = planDetails.item.amount;
+        const username = userData.firstname;
+        const application = userData.personal_id;
+        const mobileNo = userData.mobile_number;
+
+        const receipt = `order_${username}_${Date.now()}_business`;
+        const options = {
+            amount: amount,
+            currency: 'INR',
+            receipt: receipt,
+            payment_capture: 1,
+            notes: {
+                username: username,
+                mobileNumber: mobileNo,
+                application: application,
+            },
+        };
+
+        const businessData = await Business.findById(businessId).select('name businessName businessEmail businessWebsite')
+        const order = await razorpay.orders.create(options);
+        const orderPayload = {
+            order_id: order.id,
+            business_id: businessId,
+            amount: order.amount,
+            currency: order.currency,
+            receipt: order.receipt,
+            notes: order.notes,
+            status: order.status,
+            created_at: order.created_at
+        }
+        await BusinessOrder.create(orderPayload)
+        res.status(200).json({ order, razorpay_key_id: razorpay_key_id.value, businessData });
+    } catch (error) {
+        console.log("error", error)
+        res.status(500).json({ error: error.message });
+    }
+
+}
+
+/* apicontroller.businessOrder = async (req, res) => {
+    try {
+        const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
+        const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
+        const razorpay = new Razorpay({
+            key_id: razorpay_key_id.value,
+            key_secret: razorpay_key_secret.value,
+        });
+        const order = await razorpay.orders.create(options);
+        res.status(200).json({ order, razorpay_key_id: razorpay_key_id.value });
+    } catch (error) {
+        console.log("error", error)
+        res.status(500).json({ error: error.message });
+    }
+} */
+
+apicontroller.webhook = async (req, res) => {
+    try {
+        const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+        const shasum = crypto.createHmac('sha256', secret);
+        shasum.update(JSON.stringify(req.body));
+        const digest = shasum.digest('hex');
+
+        const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
+        const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
+
+        const razorpay = new Razorpay({
+            key_id: razorpay_key_id.value,
+            key_secret: razorpay_key_secret.value,
+        });
+
+        const receivedSignature = req.headers['x-razorpay-signature'];
+
+        if (digest === receivedSignature) {
+            const event = req.body.event;
+            switch (event) {
+                case "payment.failed":
+                    const payload = req.body.payload.payment.entity
+                    const payment = await razorpay.payments.fetch(payload.id);
+                    const getBusiness = await Business.findOne({ businessEmail: payment.notes.email })
+                    const subscriptions = await Subscription.findOne({ business_id: getBusiness._id });
+                    if (subscriptions.payment_id) {
+                        getBusiness.status = 'payment_failed'
+                        getBusiness.save()
+                    }
+                    break;
+                // case "payment.captured":
+
+                //     break;
+                // case "subscription.cancelled":
+
+                //     break;
+                // case "subscription.activated":
+
+                //     break;
+
+                default:
+                    break;
+            }
+            res.status(200).send('Webhook verified');
+        } else {
+            console.log('Request is not legitimate.');
+            res.status(400).send('Webhook verification failed');
+        }
+    } catch (error) {
+        console.log(error, "ErrorInWebhook")
+        res.status(400).send('Webhook verification failed');
+
     }
 }
 

@@ -13,6 +13,7 @@ const location = require('../model/location')
 var helpers = require("../helpers");
 const fs = require('fs');
 const Condition = require('../model/condition');
+const { Readable } = require('stream');
 require("dotenv").config();
 const baseURL = process.env.BASE_URL;
 
@@ -1412,18 +1413,18 @@ AdminController.businesses = async (req, res) => {
 
 AdminController.addBusinesses = async (req, res) => {
     try {
-        const form = new FormData();
-
-        Object.keys(req.body).forEach(key => {
-            form.append(key, req.body[key]);
-        });
-
-        if (req.files && req.files.businessLogo) {
-            const file = req.files.businessLogo;
-            form.append('businessLogo', fs.createReadStream(file.path), file.name);
+        if (req.files && req.files?.businessLogo) {
+            let file = req.files.businessLogo;
+            file.mv("uploads/" + file.name, function (err) {
+                if (err) {
+                    console.log("Image upload failed")
+                    return res.status(500).json({ status: false, message: "Image upload failed", error: err });
+                }
+            });
+            req.body['businessLogo'] = file.name
         }
 
-        await axios.post(`${baseURL}/api/registerBusiness`, form, {
+        await axios.post(`${baseURL}/api/registerBusiness`, req.body, {
             headers: {
                 contentType: "multipart/form-data"
             }
@@ -1433,6 +1434,49 @@ AdminController.addBusinesses = async (req, res) => {
         req.flash('errorBusiness', error?.message);
         res.redirect('/addBusinesses')
     }
+}
+
+AdminController.editBusiness = async (req, res) => {
+    try {
+        const id = req.params.id
+        const business = await axios.get(`${baseURL}/api/getBusiness/${id}`)
+        const users = await axios.get(`${baseURL}/api/user_listing`)
+        const errorMessage = req.flash('businessEditError')
+        res.status(200).render('pages/editBusiness', {
+            business: business.data.businessData,
+            users: users.data,
+            errorMessage
+        })
+    } catch (error) {
+        res.status(400).send(error.message)
+    }
+}
+
+AdminController.updateBusiness = async (req, res) => {
+    try {
+        const id = req.params.id
+        const data = req.body
+        if (req.files && req.files?.businessLogo) {
+            let file = req.files.businessLogo;
+            file.mv("uploads/" + file.name, function (err) {
+                if (err) {
+                    console.log("Image upload failed")
+                    return res.status(500).json({ status: false, message: "Image upload failed", error: err });
+                }
+            });
+            req.body['businessLogo'] = file.name
+        }
+
+        await axios.post(`${baseURL}/api/editBusiness/${id}`, data)
+        res.redirect('/businessListing')
+    } catch (error) {
+        req.flash('businessEditError', error.message)
+        res.redirect('/editBusiness')
+    }
+}
+
+AdminController.createPlans = async (req, res) => {
+    res.render('pages/createPlans')
 }
 
 module.exports = AdminController;

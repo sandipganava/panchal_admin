@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Corona Admin</title>
+  <!-- styles -->
+  <%- include('../partials/_styles') %>
+    <!-- styles -->
+</head>
+
+<body>
+  <div class="container-scroller">
+
+    <!-- partial:partials/_sidebar -->
+    <nav class="sidebar sidebar-offcanvas" id="sidebar">
+      <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+        <a class="sidebar-brand brand-logo" href="index.html"><img src="/images/logo.svg" alt="logo" /></a>
+        <a class="sidebar-brand brand-logo-mini" href="index.html"><img src="/images/logo-mini.svg" alt="logo" /></a>
+      </div>
+      <!-- partial:partials/_sidebar -->
+      <%- include('../partials/_sidebar') %>
+
+    </nav>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_navbar -->
+      <%- include('../partials/_navbar') %>
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title"> Form elements </h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Form elements</li>
+                </ol>
+              </nav>
+            </div>
+            <div class="row">
+              <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Personal info</h4>
+                    <form class="form-sample" method="post">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Name</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control text-white" placeholder="Name" name="name" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Interval</label>
+                            <div class="col-sm-9">
+                              <input type="text" name="interval" class="form-control text-white"
+                                placeholder="Interval" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Period</label>
+                            <div class="col-sm-9">
+                              <input type="text" name="period" class="form-control text-white" placeholder="Period" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Price</label>
+                            <div class="col-sm-9">
+                              <div class="input-group">
+                                <input type="number" class="form-control text-white" name="price" placeholder="Price" />
+                                <div class="input-group-append">
+                                  <span class="input-group-text" id="basic-addon2">₹</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group row align-items-center">
+                            <label class="col-sm-3 col-form-label">Recurring</label>
+                            <div class="col-sm-9">
+                              <input type="checkbox" name="is_recurring" checked placeholder="Recurring" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <button type="submit" class="btn btn-primary me-2">Submit</button>
+                      <a href="/users" class="btn btn-dark">Cancel</a>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
+          </div>
+          <!-- content-wrapper ends -->
+          <!-- partial:../../partials/_footer.html -->
+          <%- include('../partials/_footer') %>
+            <!-- partial -->
+        </div>
+        <!-- partial -->
+
+        <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <%- include('../partials/_scripts') %>
+
+</body>
+
+</html>

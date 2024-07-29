@@ -80,56 +80,59 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <%for(let i=0;i<businesses.length;i++){ const item=businesses[i]; %>
+                                                    <%for(let i=0;i<businesses.length;i++){ %>
+                                                        <%const item=businesses[i];%>
                                                         <tr>
-                                                            <td>
-                                                                <%=i+1%>
-                                                            </td>
-                                                            <td>
-                                                                <%=item.businessName%>
-                                                            </td>
-                                                            <td>
-                                                                <%=item.role%>
-                                                            </td>
-                                                            <td>
-                                                                <%=item.businessType%>
-                                                            </td>
-                                                            <td>
-                                                                <%=item.businessEmail%>
-                                                            </td>
-                                                            <td>
-                                                                <%=item.businessContactNumber%>
-                                                            </td>
-                                                            <td style="text-transform: capitalize;"
-                                                                class="<%= item.status == 'completed' ? 'text-success' : 'text-warning' %>">
-                                                                <%=item.status&&item.status.replace("_"," ")%>
+                                                                <td>
+                                                                    <%=i+1%>
+                                                                </td>
+                                                                <td>
+                                                                    <%=item.businessName%>
+                                                                </td>
+                                                                <td>
+                                                                    <%=item.role%>
+                                                                </td>
+                                                                <td>
+                                                                    <%=item.businessType%>
+                                                                </td>
+                                                                <td>
+                                                                    <%=item.businessEmail%>
+                                                                </td>
+                                                                <td>
+                                                                    <%=item.businessContactNumber%>
+                                                                </td>
+                                                                <td style="text-transform: capitalize;"
+                                                                    class="<%= item.status == 'completed' ? 'text-success' : 'text-warning' %>">
+                                                                    <%=item.status&&item.status.replace("_"," ")%>
                                                             </td>
                                                             <td>
                                                                 <button class=" view"
-                                                                    style="margin-right: 1rem;background: transparent;border: none;text-decoration: none;">
-                                                                    <i class="fa-solid fa-eye text-white"
-                                                                        style="font-size: 18px"></i>
-                                                                    </button>
-                                                                    <button class="edit"
                                                                         style="margin-right: 1rem;background: transparent;border: none;text-decoration: none;">
-                                                                        <i class="fa-solid fa-edit text-primary"
+                                                                        <i class="fa-solid fa-eye text-white"
                                                                             style="font-size: 18px"></i>
-                                                                    </button>
-                                                                    <button class="delete"
-                                                                        style="margin-right: 1rem;background: transparent;border: none;text-decoration: none;">
-                                                                        <i class="fa-solid fa-trash text-danger"
-                                                                            style="font-size: 18px"></i>
-                                                                    </button>
+                                                                        </button>
+                                                                        <button class="edit"
+                                                                            style="margin-right: 1rem;background: transparent;border: none;text-decoration: none;">
+                                                                            <i class="fa-solid fa-edit text-primary"
+                                                                                style="font-size: 18px"></i>
+                                                                        </button>
+                                                                        <button class="delete"
+                                                                            style="margin-right: 1rem;background: transparent;border: none;text-decoration: none;">
+                                                                            <i class="fa-solid fa-trash text-danger"
+                                                                                style="font-size: 18px"></i>
+                                                                        </button>
+                                                                </td>
+                                                        </tr>
+                                                    <%}%>
+                                                    <%if(!businesses.length){%>
+                                                        <tr>
+                                                            <td colspan="99" align="center">
+                                                                <h3 style="margin-bottom: 0;">
+                                                                    No data found
+                                                                </h3>
                                                             </td>
                                                         </tr>
-                                                        <%}%>
-                                                            <%if(!businesses.length){%>
-                                                                <tr>
-                                                                    <td colspan="99" align="center">
-                                                                        <h3 style="margin-bottom: 0;">No data found</h3>
-                                                                    </td>
-                                                                </tr>
-                                                                <%}%>
+                                                    <%}%>
                                                 </tbody>
                                             </table>
                                         </div>

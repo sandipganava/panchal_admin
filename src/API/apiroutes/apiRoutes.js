@@ -1,6 +1,7 @@
 var express = require('express');
 var apirouter = express.Router();
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 var user = require('../apicontroller/apiContoller')
 require("dotenv").config();
@@ -168,12 +169,19 @@ apirouter.get('/getBusiness/:id', user.getBusiness);
 apirouter.post('/editBusiness/:id', user.updateBusiness);
 apirouter.post('/activeBusiness', user.activeBusiness);
 
-apirouter.get('/userBusinesses/:user_id', user.userBusinesses)
-apirouter.get('/allBusinesses', user.allBusinesses)
-apirouter.get('/businessTemplate', user.businessTemplate)
-apirouter.get('/businessPreview/:id', user.businessPreview)
+apirouter.get('/userBusinesses/:user_id', user.userBusinesses);
+apirouter.get('/allBusinesses', user.allBusinesses);
+apirouter.get('/businessTemplate', user.businessTemplate);
+apirouter.get('/businessPreview/:id', user.businessPreview);
 
-apirouter.get('/templateListing', user.templateListing)
+apirouter.get('/templateListing', user.templateListing);
+apirouter.delete('/deleteBusiness/:id', user.deleteBusiness);
+apirouter.delete('/cancelSubscription/:id', user.cancelSubscription);
+apirouter.post('/businessOrder/:id', user.businessOrder);
+
+// apirouter.get('/')
+
+apirouter.post('/webhook', user.webhook);
 
 
 module.exports = apirouter;

@@ -20,6 +20,9 @@ const SubscriptionSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'business'
     },
+    due_date:{
+        type: String
+    },
     customer_notify: {
         type: Boolean,
     },
@@ -38,7 +41,7 @@ const SubscriptionSchema = mongoose.Schema({
     deleted_at: {
         type: String,
         default: null,
-    },
+    }
 
 });
 

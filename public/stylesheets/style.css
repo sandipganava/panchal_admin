@@ -17298,6 +17298,7 @@ code {
   .input-group-prepend .input-group-text {
     border-color: #2c2e33;
     padding: 0.56rem 0.75rem;
+    height: 100%;
     color: #4b5564;
     background: none; }
 

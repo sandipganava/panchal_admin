@@ -27,6 +27,7 @@ router.get('/admins', AdminController.admins);
 //  users page.
 router.get('/users', AdminController.users);
 router.get('/plans', AdminController.plans);
+router.get('/createPlans', AdminController.createPlans);
 router.get('/createUser', AdminController.createUser);
 router.post('/createUser', AdminController.addUser);
 router.get('/editUser/:id', AdminController.editUser);
@@ -127,6 +128,8 @@ router.get('/businessListing', AdminController.businessListing);
 
 router.get('/addBusinesses', AdminController.businesses);
 router.post('/addBusinesses', AdminController.addBusinesses);
+router.get('/editBusiness/:id',AdminController.editBusiness)
+router.post('/editBusiness/:id',AdminController.updateBusiness)
 
 
 module.exports = router;

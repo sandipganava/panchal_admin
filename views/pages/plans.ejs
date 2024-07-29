@@ -61,7 +61,7 @@
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                       <h4 class="m-0">All plans</h4>
-                      <a class="btn btn-success mb-3" href="/createUser">+ Create New Plans</a>
+                      <a class="btn btn-success mb-3" href="/createPlans">+ Create New Plans</a>
                     </div>
 
                     <div class="table-responsive">
@@ -73,6 +73,7 @@
                             <th>Interval</th>
                             <th>Period</th>
                             <th>Price</th>
+                            <th>Recurring</th>
                             <th>Action</th>
                           </tr>
                         </thead>
@@ -86,14 +87,17 @@
                                 <td>
                                   <%= item.name %>
                                 </td>
-                                <td>
-                                  <%= item.interval %>
+                                <td style="<%=!item.is_recurring&&'font-size:20px;'%>">
+                                  <%= item.interval && item.is_recurring?item.interval:"∞"%>
                                 </td>
                                 <td>
                                   <%= item.period %>
                                 </td>
                                 <td>
                                   <%= item.price %>
+                                </td>
+                                <td style="text-transform: capitalize;">
+                                  <%= item.is_recurring %>
                                 </td>
                                 <td>
                                   <button id="view" style="

@@ -5,31 +5,35 @@ const bcrypt = require("bcryptjs");
 
 
 const UserSchema = mongoose.Schema({
- 
+
     firstname: {
         type: String,
+        required: true
     },
     middlename: {
         type: String,
+        required: true
     },
     lastname: {
         type: String,
-        default:"Panchal"
+        default: "Panchal",
+        required: true
     },
     password: {
         type: String,
     },
     parent_id: {
         type: String,
-        default:null
+        default: null
     },
     payment_id: {
         type: String,
-        default:null
+        default: null
     },
     email: {
         type: String,
-        default:null
+        required: true,
+        default: null
     },
     locations_id: {
         type: mongoose.ObjectId,
@@ -39,10 +43,11 @@ const UserSchema = mongoose.Schema({
     },
     mobile_number: {
         type: Number,
+        required: true
     },
     photo: {
         type: String,
-        default:'profile_img.png'
+        default: 'profile_img.png'
     },
     personal_id: {
         type: String,
@@ -58,13 +63,15 @@ const UserSchema = mongoose.Schema({
     },
     gender: {
         type: String,
+        required: true
     },
-  
     education: {
         type: String,
+        required: true
     },
     address: {
         type: String,
+        required: true
     },
     relationship: {
         type: String,
@@ -72,6 +79,7 @@ const UserSchema = mongoose.Schema({
     },
     job: {
         type: String,
+        required: true
     },
     status: {
         type: String,
@@ -103,10 +111,9 @@ const UserSchema = mongoose.Schema({
 });
 
 UserSchema.pre("save", async function (next) {
-    if (this.isModified("password")) {
-
+    if (this.isModified("password"))
         this.password = await bcrypt.hash(this.password, 10);
-      }
+
     next();
 });
 

@@ -14,7 +14,7 @@ const PlanSchema = mongoose.Schema({
     },
     period: {
         type: String,
-        enum: ['daily', 'weekly', 'monthly', 'yearly']
+        enum: ['daily', 'weekly', 'monthly', 'yearly','one_time']
     },
     item: {
         name: {
@@ -28,8 +28,11 @@ const PlanSchema = mongoose.Schema({
         },
         description: {
             type: String,
-            required: false
         }
+    },
+    is_recurring: {
+        type: Boolean,
+        default: true
     },
     created_at: {
         type: String,
@@ -43,7 +46,6 @@ const PlanSchema = mongoose.Schema({
         type: String,
         default: null,
     },
-
 });
 
 const Plan = mongoose.model("plan", PlanSchema);

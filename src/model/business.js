@@ -5,11 +5,11 @@ const mongoose = require("mongoose");
 const BusinessSchema = mongoose.Schema({
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
+        // unique: true,
         ref: 'users'
     },
     name: {
-        type: String,
-        unique: true
+        type: String
     },
     role: {
         type: String,
@@ -26,7 +26,7 @@ const BusinessSchema = mongoose.Schema({
     },
     businessLogo: {
         type: String,
-        required: false
+        required: true
     },
     businessName: {
         type: String,
@@ -73,7 +73,7 @@ const BusinessSchema = mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["payment_pending", "completed"],
+        enum: ["payment_pending", "payment_failed", "cancelled", "completed"],
         default: "payment_pending"
     },
     images: {
@@ -87,6 +87,14 @@ const BusinessSchema = mongoose.Schema({
     template_id: {
         type: Number,
         default: 1
+    },
+    is_recurring: {
+        type: Boolean,
+        default: true
+    },
+    expired_at: {
+        type: String,
+        default: null,
     },
     created_at: {
         type: String,
