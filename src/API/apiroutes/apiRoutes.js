@@ -73,7 +73,7 @@ apirouter.post('/password_change', user.change_user_password);
 
 apirouter.post('/contactus', user.Contactus);
 apirouter.get('/contactus', user.listcontact);
-apirouter.get('/contact-delete', user.deleteContact);
+// apirouter.post('/contact-delete/:id', user.deleteContact);
 
 apirouter.get('/locationdata', user.locationdata);
 apirouter.post('/location', user.location);
@@ -145,6 +145,7 @@ apirouter.post('/faq-delete/:id', user.deletefaq);
 
 apirouter.post('/email_support', user.email_support);
 apirouter.get('/email_support', user.getemail_support);
+apirouter.post('/deleteEmailSupport/:id', user.deleteEmailSupport);
 
 
 // joinpage data for app

@@ -1534,6 +1534,7 @@ apicontroller.listcontact = async (req, res) => {
 
     try {
         const ContactData = await contact.find({ deleted_at: null });
+        console.log(ContactData,"contact::::::")
         res.status(200).json(ContactData)
 
     } catch (error) {
@@ -1542,22 +1543,7 @@ apicontroller.listcontact = async (req, res) => {
 
 }
 
-apicontroller.deleteContact = async (req, res) => {
 
-    // var id = req.params.id
-    // try {
-    //     const contactData= {
-    //         deleted_at: Date(),
-    //     };
-    //     const newsave = await CommitteeMembers.findByIdAndUpdate(id, contactData);
-    //     cache.del('committeemembers');
-    //     res.status(200).json(newsave)
-
-    // } catch (error) {
-    //     res.status(500).send(error);
-    // }
-
-}
 
 apicontroller.CommitteeMembers = async (req, res) => {
     try {
@@ -2642,6 +2628,23 @@ apicontroller.getemail_support = async (req, res) => {
         console.log(error)
         res.status(500).json(error)
     }
+}
+
+apicontroller.deleteEmailSupport = async (req, res) => {
+
+    var id = req.params.id
+    try {
+        const delete_email= {
+            deleted_at: Date(),
+        };
+        const EmailsupportData = await Emailsupport.findByIdAndUpdate(id, delete_email);
+        cache.del('Emailsupport');
+        res.status(200).json(Emailsupport)
+
+    } catch (error) {
+        res.status(500).send(error);
+    }
+
 }
 
 apicontroller.joinpage = async (req, res) => {

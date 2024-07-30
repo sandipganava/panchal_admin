@@ -31,7 +31,7 @@
     }
 
     .fixed-width-table th.Title {
-      width: 25%;
+      width: 10%;
     }
 
     .fixed-width-table th.Action {
@@ -92,10 +92,10 @@
                         <tr>
                           <th class="No"> No </th>
                           <th class="Image" style="text-align: center;"> Image </th>
-                          <th class="Title"> titleG </th>
-                          <th> DescriptionG </th>
-                          <th class="Title"> titleG </th>
-                          <th> DescriptionG </th>
+                          <th class="Title"> title </th>
+                          <th> Description</th>
+                          <!-- <th class="Title"> titleG </th>
+                          <th> DescriptionG </th> -->
                           <th class="Action"> Action </th>
                         </tr>
                       </thead>
@@ -107,8 +107,8 @@
                               <td style="text-align: center;"> <img src="/uploads/<%= aboutusData[i].image %>" alt="" style="width: 150px; height: 150px;"> </td>
                               <td> <%= aboutusData[i].titleE %> </td>
                               <td> <%- aboutusData[i].descriptionE %> </td>
-                              <td> <%= aboutusData[i].titleG %> </td>
-                              <td> <%- aboutusData[i].descriptionG %> </td>
+                              <!-- <td> <%= aboutusData[i].titleG %> </td>
+                              <td> <%- aboutusData[i].descriptionG %> </td> -->
                               <td>
                                 <a
                                 href="/editAboutus/<%= aboutusData[i]._id %>"

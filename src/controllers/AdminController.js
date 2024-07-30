@@ -33,7 +33,7 @@ const AdminController = {};
 AdminController.loginPage = async (req, res) => {
     sess = req.session;
     if (sess?.userdetails) {
-        res.render('index',{failEmail:'',failPass:''})
+        res.redirect('/admin/index')
     } else {
         res.render('login',{failEmail:'',failPass:''})
     }
@@ -1198,6 +1198,18 @@ AdminController.contacts = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+AdminController.deletContacts = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await axios.post(`${baseURL}/api/deleteEmailSupport/${id}`);
+        res.redirect('/contacts');
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+
+}
 
 
 
