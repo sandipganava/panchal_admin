@@ -6,20 +6,6 @@ const session = require('express-session');
 const sessions = require("../middleware/session");
 const FileStore = require("session-file-store")(session);
 
-var options = {
-    path: "/sessions",
-    logFn: function () {}
-};
-
-router.use(
-    session({
-      store: new FileStore(options),
-      secret: "bajhsgdsaj cat",
-      resave: false,
-      saveUninitialized: false,
-      cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 },
-    })
-  );
 
 router.use(flash());
 
