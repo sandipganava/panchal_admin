@@ -10,6 +10,8 @@ const path = require('path');
 const joinpage = require('../model/joinpage')
 const user = require('../model/user')
 const location = require('../model/location')
+const payment = require('../model/payment')
+const CommitteeMember = require('../model/CommitteeMembers')
 var helpers = require("../helpers");
 const fs = require('fs');
 const Condition = require('../model/condition');
@@ -30,10 +32,10 @@ const AdminController = {};
 
 AdminController.loginPage = async (req, res) => {
     sess = req.session;
-    if (!(sess?.userdetails)) {
-        res.render('index')
+    if (sess?.userdetails) {
+        res.render('index',{failEmail:'',failPass:''})
     } else {
-        res.redirect('/admin/index')
+        res.render('login',{failEmail:'',failPass:''})
     }
 };
 
@@ -50,7 +52,7 @@ AdminController.login = async (req, res) => {
         const response = await axios.post(`${baseURL}/api/login`, Logindata);
         //   console.log(response,'response')
         if (response.data.emailError === "Invalid email") {
-            // req.flash("failEmail", "Invalid email");
+            req.flash("failEmail", "Invalid email");
             return res.redirect("/");
         }
 
@@ -60,10 +62,11 @@ AdminController.login = async (req, res) => {
                 maxAge: 1000 * 60 * 60 * 24, // 1 day
                 httpOnly: true,
             });
+           
             return res.redirect("/admin/index");
         }
 
-        // req.flash("failPass", "Invalid password");
+        req.flash("failPass", "Invalid password");
         return res.redirect("/");
     } catch (e) {
         res.status(400).send(e);
@@ -100,8 +103,35 @@ AdminController.users = async (req, res) => {
 };
 
 AdminController.dashboard = async (req, res) => {
+
+    const users = await user.find({ deleted_at: null, payment_id: { $ne: null } })
+    const locations = await location.find({ deleted_at: null })
+    const CommitteeMembers = await CommitteeMember.find({ deleted_at: null })
+
+    let paymentData;
+    let totalCapturedAmount = 0;
     try {
-        res.render('index');
+        const response = await helpers.axiosdata("get", "/api/Allpayment");
+        console.log(response, "::: peyment")
+        paymentData = response.data.items;
+
+        for (let i = 0; i < paymentData.length; i++) {
+            const element = paymentData[i];
+
+
+            if (element.status === 'captured') {
+                const amount = element.amount / 100;
+                totalCapturedAmount += amount;
+            }
+        }
+
+    } catch (error) {
+        console.log(error);
+    }
+
+
+    try {
+        res.render('index' , { users: users.length, locations: locations.length, payments: totalCapturedAmount, CommitteeMembers: CommitteeMembers.length });
     } catch (error) {
         // Handle rendering errors
         console.error("Error", error);
