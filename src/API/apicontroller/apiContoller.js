@@ -1534,7 +1534,7 @@ apicontroller.listcontact = async (req, res) => {
 
     try {
         const ContactData = await contact.find({ deleted_at: null });
-        console.log(ContactData,"contact::::::")
+        console.log(ContactData, "contact::::::")
         res.status(200).json(ContactData)
 
     } catch (error) {
@@ -1547,15 +1547,20 @@ apicontroller.listcontact = async (req, res) => {
 
 apicontroller.CommitteeMembers = async (req, res) => {
     try {
+       
         const addCommitteeMembers = new CommitteeMembers({
-            fullname: req.body.fullname,
-            role: req.body.role,
-            image: req.body.image,
+            fullnameG: req.body.fullnameG,
+            fullnameE: req.body.fullnameE,
+            roleG: req.body.roleG,
+            roleE: req.body.roleE,
             mobile_number: req.body.mobile_number,
-            village: req.body.village,
+            villageG: req.body.villageG,
+            villageE: req.body.villageE,
+            image: req.body.image
         });
         const CommitteeMembersData = await addCommitteeMembers.save();
         cache.del('committeemembers');
+
         res.status(200).json(CommitteeMembersData)
 
     } catch (error) {
@@ -1574,6 +1579,7 @@ apicontroller.listCommitteeMembers = async (req, res) => {
             CommitteeMembersData = await CommitteeMembers.find({ deleted_at: null });
             cache.set('committeemembers', JSON.stringify(CommitteeMembersData));
         }
+        // console.log(CommitteeMembersData, 'CommitteeMembersData')
         return res.status(200).json(CommitteeMembersData);
 
     } catch (error) {
@@ -1613,10 +1619,13 @@ apicontroller.CommitteeMembers_update = async (req, res) => {
 
     try {
         const updateCommitteeMembers = {
-            fullname: req.body.fullname,
+            fullnameG: req.body.fullnameG,
+            fullnameE: req.body.fullnameE,
+            roleG: req.body.roleG,
+            roleE: req.body.roleE,
             mobile_number: req.body.mobile_number,
-            village: req.body.village,
-            role: req.body.role,
+            villageG: req.body.villageG,
+            villageE: req.body.villageE,
             image: req.body.image,
             updated_at: Date(),
         };
@@ -2634,7 +2643,7 @@ apicontroller.deleteEmailSupport = async (req, res) => {
 
     var id = req.params.id
     try {
-        const delete_email= {
+        const delete_email = {
             deleted_at: Date(),
         };
         const EmailsupportData = await Emailsupport.findByIdAndUpdate(id, delete_email);
