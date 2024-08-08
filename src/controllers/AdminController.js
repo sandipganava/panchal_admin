@@ -31,6 +31,7 @@ const AdminController = {};
 
 AdminController.loginPage = async (req, res) => {
     sess = req.session;
+    console.log('ddd')
     if (sess?.userdetails) {
         res.redirect('/admin/index')
     } else {
@@ -42,7 +43,6 @@ AdminController.login = async (req, res) => {
     // console.log(req.cookies,'cookies')
     try {
         // const token = req.cookies.jwt;
-        // console.log(token, 'token')
         const Logindata = {
             email: req.body.email,
             password: req.body.password,
@@ -68,7 +68,8 @@ AdminController.login = async (req, res) => {
         req.flash("failPass", "Invalid password");
         return res.redirect("/");
     } catch (e) {
-        res.status(400).send(e);
+        console.log(e.response.data.passwordError,"Errorororororo")
+        res.status(400).send(e.response.data.passwordError||e);
     }
 };
 
@@ -103,15 +104,13 @@ AdminController.users = async (req, res) => {
 
 AdminController.dashboard = async (req, res) => {
 
-
     try {
         const users = await user.find({ deleted_at: null, payment_id: { $ne: null } })
         const locations = await location.find({ deleted_at: null })
         const CommitteeMembers = await CommitteeMember.find({ deleted_at: null })
-
+    
         let paymentData;
         let totalCapturedAmount = 0;
-
         const response = await helpers.axiosdata("get", "/api/Allpayment");
         paymentData = response.data.items;
 
@@ -124,8 +123,7 @@ AdminController.dashboard = async (req, res) => {
                 totalCapturedAmount += amount;
             }
         }
-
-        res.render('index', { users: users.length, locations: locations.length, payments: totalCapturedAmount, CommitteeMembers: CommitteeMembers.length });
+        res.render('index' , { users: users.length, locations: locations.length, payments: totalCapturedAmount, CommitteeMembers: CommitteeMembers.length });
     } catch (error) {
         console.error("Error", error);
         res.status(500).send("Internal Server Error");

@@ -216,6 +216,7 @@ apicontroller.login = async (req, res) => {
         res.status(500).send(error);
     }
 };
+
 apicontroller.userlogin = async (req, res) => {
     console.log(req.body, 'req body')
     try {
