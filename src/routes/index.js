@@ -20,7 +20,7 @@ router.get('/logout', AdminController.logoutuser);
 router.get('/forgotpass',  AdminController.getforgotpass);
 
 //home page
-router.get('/admin/index',sessions,   AdminController.dashboard);
+router.get('/admin/index', sessions,   AdminController.dashboard);
 //  admins page.
 router.get('/admins', sessions,  AdminController.admins);
 
@@ -60,7 +60,7 @@ router.post('/editAboutus/:id', sessions , AdminController.updateAboutus);
 router.get('/deleteAboutus/:id', sessions , AdminController.deleteAboutus);
 
 //  slider page.
-router.get('/slider',sessions,  AdminController.slider);
+router.get('/slider', sessions ,  AdminController.slider);
 router.get('/createSlider', sessions , AdminController.createSilder);
 router.post('/createSlider', sessions , AdminController.addSlider);
 router.get('/deleteSlider/:id', sessions , AdminController.deleteSlider);
@@ -74,7 +74,7 @@ router.post('/editCommitee/:id', sessions , AdminController.updateCommitee);
 router.get('/deleteCommitee/:id', sessions , AdminController.deleteCommitee);
 
 //  news page.
-router.get('/news',sessions,   AdminController.news);
+router.get('/news', sessions,   AdminController.news);
 router.get('/createNews', sessions , AdminController.createNews);
 router.post('/createNews', sessions , AdminController.addNews);
 router.get('/editNews/:id', sessions , AdminController.editNews);
@@ -86,7 +86,7 @@ router.get('/changeuserPassword', sessions , AdminController.password); // admin
 router.post('/changeuserPassword', sessions , AdminController.changeuserPassword);
 
 // Faqs page
-router.get('/faqs',sessions,  AdminController.faqs);
+router.get('/faqs', sessions,  AdminController.faqs);
 router.get('/createFaqs', sessions , AdminController.createFaqs);
 router.post('/createFaqs', sessions , AdminController.addFaqs);
 router.get('/editFaqs/:id', sessions , AdminController.editFaqs);
@@ -94,7 +94,7 @@ router.post('/editFaqs/:id', sessions , AdminController.updateFaqs);
 router.get('/deleteFaqs/:id', sessions , AdminController.deleteFaqs);
 
 // Condition page
-router.get('/termsandcondition',sessions,  AdminController.termsandcondition);
+router.get('/termsandcondition', sessions,  AdminController.termsandcondition);
 router.get('/createTermsandcondition', sessions , AdminController.createTermsandcondition);
 router.post('/createTermsandcondition', sessions , AdminController.addTermsandcondition);
 router.get('/editTermsandcondition/:id', sessions , AdminController.editTermsandcondition);
@@ -115,8 +115,8 @@ router.get('/payments', sessions , AdminController.payments);
 
 
 //  contacts page.
-router.get('/contacts', AdminController.contacts);
-router.get('/deletContacts/:id', AdminController.deletContacts);
+router.get('/contacts', sessions , AdminController.contacts);
+router.get('/deletContacts/:id', sessions, AdminController.deletContacts);
 
 // for login page
 router.get('/joinpage', sessions, AdminController.joinpage);

@@ -4,16 +4,25 @@ const mongoose = require("mongoose");
 
 const CommitteeMembersSchema = mongoose.Schema({
  
-    fullname: {
+    fullnameG: {
+        type: String,
+    },
+    fullnameE: {
         type: String,
     },
     mobile_number: {
         type: String,
     },
-    village: {
+    villageG: {
         type: String,
     },
-    role: {
+    villageE: {
+        type: String,
+    },
+    roleG: {
+        type: String,
+    },
+    roleE: {
         type: String,
     },
     image: {

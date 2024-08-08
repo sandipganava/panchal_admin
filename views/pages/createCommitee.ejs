@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Corona Admin</title>
-   <!-- styles -->
+  <!-- styles -->
   <%- include('../partials/_styles') %>
     <!-- styles -->
 </head>
@@ -20,73 +20,99 @@
         <a class="sidebar-brand brand-logo" href="index.html"><img src="/images/logo.svg" alt="logo" /></a>
         <a class="sidebar-brand brand-logo-mini" href="index.html"><img src="/images/logo-mini.svg" alt="logo" /></a>
       </div>
-       <!-- partial:partials/_sidebar -->
+      <!-- partial:partials/_sidebar -->
       <%- include('../partials/_sidebar') %>
-    
+
     </nav>
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
       <!-- partial:partials/_navbar -->
       <%- include('../partials/_navbar') %>
-      <div class="main-panel">
-        <div class="content-wrapper">
-          <div class="page-header">
-            <h3 class="page-title"> Hello, Admin Welcome </h3>
-            <nav aria-label="breadcrumb">
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Forms</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Form elements</li>
-              </ol>
-            </nav>
-          </div>
-          <div class="row">
-            <div class="col-md-6 grid-margin stretch-card">
-              <div class="card">
-                <div class="card-body">
-                  <h4 class="card-title">Committee Members</h4>
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title"> Hello, Admin Welcome </h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Form elements</li>
+                </ol>
+              </nav>
+            </div>
+            <div class="row">
+              <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Committee Members</h4>
 
-           
-                  <form class="forms-sample" autocomplete="off" method="post" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="fullname">Full Name</label>
-                        <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Full Name">
-                    </div>
-                    <div class="form-group">
-                        <label for="role">Committee Members Role</label>
-                        <input type="text" class="form-control" id="role" name="role" placeholder="Committee Members Role">
-                    </div>
-                    <div class="form-group">
+
+                    <form class="forms-sample" autocomplete="off" method="post" enctype="multipart/form-data">
+                      <div style="display: flex; justify-content: space-between;">
+                        <div class="form-group" style="width:48% ">
+                          <label for="fullname">Full Name G</label>
+                          <input style="color: white;" type="text" class="form-control" id="fullname" name="fullnameG"
+                            placeholder="Full name in gujarati" required>
+                        </div>
+                        <div class="form-group" style="width:48% ">
+                          <label for="fullname">Full Name E</label>
+                          <input style="color: white;" type="text" class="form-control" id="fullname" name="fullnameE"
+                            placeholder="Full name english" required>
+                        </div>
+                      </div>
+                      <div style="display: flex; justify-content: space-between;">
+                        <div class="form-group" style="width:48% ">
+                          <label for="role">Committee Members Role G</label>
+                          <input style="color: white;" type="text" class="form-control" id="role" name="roleG"
+                            placeholder="Committee members role gujartai" required>
+                        </div>
+                        <div class="form-group" style="width:48% ">
+                          <label for="role">Committee Members Role E</label>
+                          <input style="color: white;" type="text" class="form-control" id="role" name="roleE"
+                            placeholder="Committee members role english" required> 
+                        </div>
+
+                      </div>
+                      <div class="form-group">
                         <label for="number">Mobile Number</label>
-                        <input type="text" class="form-control" id="mobile_number" name="mobile_number" placeholder="Mobile Number">
-                    </div>
-                    <div class="form-group">
-                        <label for="village">Village</label>
-                        <input type="text" class="form-control" id="village" name="village" placeholder="Village">
-                    </div>
-                    <div class="form-group">
+                        <input style="color: white;" type="text" class="form-control" id="mobile_number"
+                          name="mobile_number" placeholder="Mobile Number" required>
+                      </div>
+                      <div style="display: flex; justify-content: space-between;">
+                        <div class="form-group" style="width:48% ">
+                          <label for="village">Village G</label>
+                          <input style="color: white;" type="text" class="form-control" id="village" name="villageG"
+                            placeholder="Village" required>
+                        </div>
+                        <div class="form-group" style="width:48% ">
+                          <label for="village">Village E</label>
+                          <input style="color: white;" type="text" class="form-control" id="village" name="villageE"
+                            placeholder="Village" required>
+                        </div>
+                      </div>
+                      <div class="form-group">
                         <label for="image">Image</label>
-                        <input type="file" class="form-control" id="image" name="image" placeholder="Image">
-                    </div>
-                    <button type="submit" class="btn btn-primary me-2">Submit</button>
-                    <button class="btn btn-dark">Cancel</button>
-                </form>
-                
-                
+                        <input type="file" style="color: white;" class="form-control" id="image" name="image" placeholder="Image" >
+                      </div>
+                      <button type="submit" class="btn btn-primary me-2">Submit</button>
+                      <a href="/committee" class="btn btn-dark">Cancel</a>
+                    </form>
+
+
+                  </div>
                 </div>
               </div>
-            </div>
-       
-        
-          </div>
-        </div>
-   
-        <%- include('../partials/_footer') %>
 
+
+            </div>
+          </div>
+
+          <%- include('../partials/_footer') %>
+
+            <!-- partial -->
+        </div>
         <!-- partial -->
-      </div>
-      <!-- partial -->
-   
-      <!-- main-panel ends -->
+
+        <!-- main-panel ends -->
     </div>
     <!-- page-body-wrapper ends -->
   </div>

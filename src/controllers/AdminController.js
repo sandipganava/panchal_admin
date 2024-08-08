@@ -20,7 +20,6 @@ require("dotenv").config();
 const baseURL = process.env.BASE_URL;
 
 // AdminController.js
-
 const AdminController = {};
 
 /**
@@ -721,22 +720,26 @@ AdminController.postCommitee = async (req, res) => {
         });
 
         const committeeMembers = {
-            fullname: req.body.fullname,
-            role: req.body.role,
+            fullnameG: req.body.fullnameG,
+            fullnameE: req.body.fullnameE,
+            roleG: req.body.roleG,
+            roleE: req.body.roleE,
             mobile_number: req.body.mobile_number,
-            village: req.body.village,
+            villageG: req.body.villageG,
+            villageE: req.body.villageE,
             image: file.name
         };
 
 
         const response = await axios.post(`${baseURL}/api/committee_members/`, committeeMembers);
+        console.log(response,"response")
         const data = response.data;
         console.log(data);
 
         res.redirect('/committee');
     } catch (error) {
         // Handle rendering errors
-        console.error("Error adding slider:", error);
+        console.error("Error adding CommitteMemmber:", error);
         res.status(500).send("Internal Server Error");
     }
 }
@@ -745,6 +748,7 @@ AdminController.editCommitee = async (req, res) => {
         const id = req.params.id;
         const response = await axios.get(`${baseURL}/api/committee_members-edit/${id}`);
         const data = response.data;
+        console.log(data, '::::::Data')
         res.render('pages/editCommitee', { committeeMembers: data });
     } catch (error) {
         console.error("Error", error);
@@ -755,7 +759,7 @@ AdminController.editCommitee = async (req, res) => {
 AdminController.updateCommitee = async (req, res) => {
     try {
         const id = req.params.id;
-        const { fullname, role, mobile_number, village } = req.body;
+        const { fullnameG,fullnameE,roleG, roleE, mobile_number, villageG, villageE  } = req.body;
 
         let image = null;
         if (req.files && req.files.image) {
@@ -779,10 +783,13 @@ AdminController.updateCommitee = async (req, res) => {
 
         // Prepare data to be sent in the request
         const commiteeData = {
-            fullname,
-            role,
+            fullnameG,
+            fullnameE,
+            roleG,
+            roleE,
             mobile_number,
-            village,
+            villageE,
+            villageG,
         };
 
         // Add image to the request data only if it exists
