@@ -17,7 +17,7 @@ app.use(session({
   secret: process.env.JWT_SECRET,
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 60000 } 
+  cookie: { maxAge: 86400000} 
 }));
 app.use(flash());
 // view engine setup

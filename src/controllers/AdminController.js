@@ -34,7 +34,7 @@ AdminController.loginPage = async (req, res) => {
     if (sess?.userdetails) {
         res.redirect('/admin/index')
     } else {
-        res.render('login',{failEmail:'',failPass:''})
+        res.render('login', { failEmail: '', failPass: '' })
     }
 };
 
@@ -61,7 +61,7 @@ AdminController.login = async (req, res) => {
                 maxAge: 1000 * 60 * 60 * 24, // 1 day
                 httpOnly: true,
             });
-           
+
             return res.redirect("/admin/index");
         }
 
@@ -103,15 +103,16 @@ AdminController.users = async (req, res) => {
 
 AdminController.dashboard = async (req, res) => {
 
-    const users = await user.find({ deleted_at: null, payment_id: { $ne: null } })
-    const locations = await location.find({ deleted_at: null })
-    const CommitteeMembers = await CommitteeMember.find({ deleted_at: null })
 
-    let paymentData;
-    let totalCapturedAmount = 0;
     try {
+        const users = await user.find({ deleted_at: null, payment_id: { $ne: null } })
+        const locations = await location.find({ deleted_at: null })
+        const CommitteeMembers = await CommitteeMember.find({ deleted_at: null })
+
+        let paymentData;
+        let totalCapturedAmount = 0;
+
         const response = await helpers.axiosdata("get", "/api/Allpayment");
-        console.log(response, "::: peyment")
         paymentData = response.data.items;
 
         for (let i = 0; i < paymentData.length; i++) {
@@ -124,18 +125,12 @@ AdminController.dashboard = async (req, res) => {
             }
         }
 
+        res.render('index', { users: users.length, locations: locations.length, payments: totalCapturedAmount, CommitteeMembers: CommitteeMembers.length });
     } catch (error) {
-        console.log(error);
-    }
-
-
-    try {
-        res.render('index' , { users: users.length, locations: locations.length, payments: totalCapturedAmount, CommitteeMembers: CommitteeMembers.length });
-    } catch (error) {
-        // Handle rendering errors
         console.error("Error", error);
         res.status(500).send("Internal Server Error");
     }
+
 };
 AdminController.admins = async (req, res) => {
     try {
@@ -349,8 +344,8 @@ AdminController.abouts = async (req, res) => {
         // const response = await axios.get(`${baseURL}/api/aboutus/`, headers = {
         //     "isadmin": true,
         // },)
+
         const data = response.data;
-        console.log(data, 'data')
         res.render('pages/abouts', { aboutusData: data.AboutusData });
     } catch (error) {
         // Handle rendering errors
@@ -611,7 +606,6 @@ AdminController.slider = async (req, res) => {
     try {
         const response = await axios.get(`${baseURL}/api/slider`);
         const data = response.data;
-        console.log(data, 'data')
         res.render('pages/slider', { sliders: data });
 
     } catch (error) {
@@ -738,7 +732,7 @@ AdminController.postCommitee = async (req, res) => {
 
 
         const response = await axios.post(`${baseURL}/api/committee_members/`, committeeMembers);
-        console.log(response,"response")
+        console.log(response, "response")
         const data = response.data;
         console.log(data);
 
@@ -765,7 +759,7 @@ AdminController.editCommitee = async (req, res) => {
 AdminController.updateCommitee = async (req, res) => {
     try {
         const id = req.params.id;
-        const { fullnameG,fullnameE,roleG, roleE, mobile_number, villageG, villageE  } = req.body;
+        const { fullnameG, fullnameE, roleG, roleE, mobile_number, villageG, villageE } = req.body;
 
         let image = null;
         if (req.files && req.files.image) {
@@ -1421,7 +1415,6 @@ AdminController.deleteTermsandcondition = async (req, res) => {
 
 AdminController.plans = async (req, res) => {
     const response = await axios.get(`${baseURL}/api/getPlans/`);
-    console.log(response.data.plans, "response")
     res.render("pages/plans", { plans: response.data.plans })
 }
 

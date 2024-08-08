@@ -188,7 +188,7 @@ apicontroller.register = async (req, res) => {
 };
 
 apicontroller.login = async (req, res) => {
-    console.log(req.body, 'req body')
+   
     try {
         const personal_email = req.body.email;
         const password = req.body.password;
@@ -207,7 +207,6 @@ apicontroller.login = async (req, res) => {
                     expiresIn: "5d",
                 });
                 const userdetails = await admin.findByIdAndUpdate(users._id, { token });
-                console.log(userdetails, 'users')
                 res.status(200).json({ login_status: "login success", userdetails });
             } else {
                 res.json({ passwordError: "Incorrect password" });
@@ -2432,7 +2431,6 @@ apicontroller.childData = async (req, res) => {
 
         // console.log(response.childData, "childData")
         const familyData = constructFamilyTree(response.mainUser, response.childData);
-        console.log(familyData, "familyData")
         res.status(200).json(familyData);
     } catch (error) {
         console.error('Error fetching user data:', error.message);
