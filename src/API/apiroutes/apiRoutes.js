@@ -15,7 +15,7 @@ const checkApiKey = (req, res, next) => {
     next();
   }
 };
-
+apirouter.use(checkApiKey)
 const multer = require('multer');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -74,7 +74,6 @@ apirouter.post('/password_change', user.change_user_password);
 apirouter.post('/contactus', user.Contactus);
 apirouter.get('/contactus', user.listcontact);
 // apirouter.post('/contact-delete/:id', user.deleteContact);
-
 apirouter.get('/locationdata', user.locationdata);
 apirouter.post('/location', user.location);
 apirouter.get('/location', user.listlocation);
@@ -87,7 +86,6 @@ apirouter.get('/aboutus', user.listaboutus);
 apirouter.post('/delete_aboutus/:id', user.delete_aboutus);
 apirouter.get('/aboutus-edit/:id', user.aboutus_edit);
 apirouter.post('/aboutus-edit/:id', user.aboutus_update);
-
 
 apirouter.post('/committee_members', user.CommitteeMembers);
 apirouter.get('/committee_members', user.listCommitteeMembers);
