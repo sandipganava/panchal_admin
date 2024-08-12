@@ -18,7 +18,7 @@ const Condition = require('../model/condition');
 const { Readable } = require('stream');
 require("dotenv").config();
 const baseURL = process.env.BASE_URL;
-
+const API_KEY = process.env.API_KEY;
 // AdminController.js
 const AdminController = {};
 
@@ -47,7 +47,7 @@ AdminController.login = async (req, res) => {
             password: req.body.password,
         };
 
-        const response = await axios.post(`${baseURL}/api/login`, Logindata);
+        const response = await axios.post(`${baseURL}/api/login`,Logindata,{headers: {'x-api-key': API_KEY}});
         //   console.log(response,'response')
         if (response.data.emailError === "Invalid email") {
             req.flash("failEmail", "Invalid email");

@@ -134,6 +134,4 @@ router.get('/editBusiness/:id', sessions ,AdminController.editBusiness)
 router.post('/editBusiness/:id', sessions ,AdminController.updateBusiness)
 
 
-
-
 module.exports = router;

@@ -31,8 +31,6 @@ const registerEmail = require("../../utils/send_register_mail")
 const { json } = require('express')
 const { request } = require('http')
 const { default: axios } = require('axios')
-const NodeCache = require("node-cache");
-const cache = new NodeCache();
 require("dotenv").config();
 const serviceAccount = require('../../utils/serviceAccountKey.json');
 const adminEmail = 'codecrew0@gmail.com';
@@ -50,6 +48,7 @@ const BusinessOrder = require('../../model/businessOrder')
 const { getTargetDate } = require('../../utils/helper')
 const moment = require('moment')
 const Locations = require('../../model/location')
+const sanitizeHtml = require('sanitize-html');
 firebase_admin.initializeApp({
     credential: firebase_admin.credential.cert(serviceAccount),
 });
@@ -398,7 +397,7 @@ apicontroller.user_register = async (req, res) => {
 
 
         let lastUser = await user.findOne({ deleted_at: null, parent_id: null }).sort({ _id: -1 }).limit(1);
-        lastUser = lastUser.personal_id 
+        lastUser = lastUser.personal_id
 
         const newUserCode = generateUserCode(lastUser);
 
@@ -1060,7 +1059,7 @@ apicontroller.location_update = async (req, res) => {
             updated_at: Date(),
         };
         const newsave = await location.findByIdAndUpdate(id, updateLocation, { new: true });
-        cache.del('location');
+
         res.status(200).json(newsave);
 
     } catch (error) {
@@ -1158,7 +1157,6 @@ apicontroller.location_delete = async (req, res) => {
             deleted_at: Date(),
         };
         const newsave = await location.findByIdAndUpdate(id, deletelocation);
-        cache.del('location');
         res.status(200).json(newsave)
 
     } catch (error) {
@@ -1429,7 +1427,6 @@ apicontroller.location = async (req, res) => {
             pincode: req.body.pincode,
             image: req.body.image
         });
-        cache.del('location');
         const Locationadd = await addLocation.save();
         res.status(200).json(Locationadd)
 
@@ -1443,27 +1440,20 @@ apicontroller.location = async (req, res) => {
 
 apicontroller.locationdata = async (req, res) => {
     try {
-        let locationData;
-        if (cache.has('location')) {
-            console.log('Cache has location');
-            locationData = JSON.parse(cache.get('location'));
-        } else {
-            console.log('Cache has no location');
-            locationData = await location.find({ deleted_at: null });
-            locationData.sort((a, b) => {
-                if (a.village && b.village) {
-                    return a.village.localeCompare(b.village, 'en', { sensitivity: 'base' });
-                }
-                if (!a.village && b.village) {
-                    return 1;
-                } else if (a.village && !b.village) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            });
-            cache.set('location', JSON.stringify(locationData));
-        }
+
+        let locationData = await location.find({ deleted_at: null });
+        locationData.sort((a, b) => {
+            if (a.village && b.village) {
+                return a.village.localeCompare(b.village, 'en', { sensitivity: 'base' });
+            }
+            if (!a.village && b.village) {
+                return 1;
+            } else if (a.village && !b.village) {
+                return -1;
+            } else {
+                return 0;
+            }
+        });
 
         return res.status(200).json(locationData);
     } catch (error) {
@@ -1477,26 +1467,20 @@ apicontroller.listlocation = async (req, res) => {
         if (req.query.searchValue) {
             locationData = await location.find({ deleted_at: null, village: { $regex: req.query.searchValue, $options: "i" } });
         } else {
-            if (cache.has('location')) {
-                console.log('Cache has location');
-                locationData = JSON.parse(cache.get('location'));
-            } else {
-                console.log('Cache has no location');
-                locationData = await location.find({ deleted_at: null });
-                locationData.sort((a, b) => {
-                    if (a.village && b.village) {
-                        return a.village.localeCompare(b.village, 'en', { sensitivity: 'base' });
-                    }
-                    if (!a.village && b.village) {
-                        return 1;
-                    } else if (a.village && !b.village) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                });
-                cache.set('location', JSON.stringify(locationData));
-            }
+
+            locationData = await location.find({ deleted_at: null });
+            locationData.sort((a, b) => {
+                if (a.village && b.village) {
+                    return a.village.localeCompare(b.village, 'en', { sensitivity: 'base' });
+                }
+                if (!a.village && b.village) {
+                    return 1;
+                } else if (a.village && !b.village) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
         }
 
         const transformedData = locationData.map(location => {
@@ -1564,7 +1548,6 @@ apicontroller.CommitteeMembers = async (req, res) => {
             image: req.body?.image || "profile_img.jpg"
         });
         const CommitteeMembersData = await addCommitteeMembers.save();
-        cache.del('committeemembers');
 
         res.status(200).json(CommitteeMembersData)
 
@@ -1575,16 +1558,8 @@ apicontroller.CommitteeMembers = async (req, res) => {
 
 apicontroller.listCommitteeMembers = async (req, res) => {
     try {
-        let CommitteeMembersData;
-        if (cache.has('committeemembers')) {
-            console.log('Cache has committeemembers')
-            CommitteeMembersData = JSON.parse(cache.get('committeemembers'));
-        } else {
-            console.log('Cache has no committeemembers');
-            CommitteeMembersData = await CommitteeMembers.find({ deleted_at: null });
-            cache.set('committeemembers', JSON.stringify(CommitteeMembersData));
-        }
-        // console.log(CommitteeMembersData, 'CommitteeMembersData')
+        let CommitteeMembersData = await CommitteeMembers.find({ deleted_at: null });
+
         return res.status(200).json(CommitteeMembersData);
 
     } catch (error) {
@@ -1601,7 +1576,6 @@ apicontroller.delete_CommitteeMembers = async (req, res) => {
             deleted_at: Date(),
         };
         const newsave = await CommitteeMembers.findByIdAndUpdate(id, delete_Committee);
-        cache.del('committeemembers');
         res.status(200).json(newsave)
 
     } catch (error) {
@@ -1635,7 +1609,6 @@ apicontroller.CommitteeMembers_update = async (req, res) => {
             updated_at: Date(),
         };
         const newsave = await CommitteeMembers.findByIdAndUpdate(id, updateCommitteeMembers, { new: true });
-        cache.del('committeemembers');
         res.status(200).json(newsave);
 
     } catch (error) {
@@ -1655,8 +1628,6 @@ apicontroller.aboutus = async (req, res) => {
             image: req.body.image
         });
         const Aboutus = await addAboutus.save();
-
-        cache.del('aboutus');
         res.status(200).json(Aboutus)
 
     } catch (error) {
@@ -1670,25 +1641,12 @@ apicontroller.listaboutus = async (req, res) => {
         let AboutusData;
         const isadmin = req.headers.isadmin;
         if (isadmin) {
-            if (cache.has('aboutus')) {
-                console.log('Cache has aboutus')
-                AboutusData = JSON.parse(cache.get('aboutus'));
-            } else {
-                console.log('Cache has no aboutus');
-                AboutusData = await aboutus.find({ deleted_at: null }).sort({ created_at: -1 });
-                cache.set('aboutus', JSON.stringify(AboutusData));
-            }
+            AboutusData = await aboutus.find({ deleted_at: null }).sort({ created_at: -1 });
             // console.log(object)
             return res.status(200).json({ AboutusData });
         } else {
-            if (cache.has('aboutus')) {
-                console.log('Cache has aboutus')
-                AboutusData = JSON.parse(cache.get('aboutus'));
-            } else {
-                console.log('Cache has no aboutus');
-                AboutusData = await aboutus.findOne({ deleted_at: null }).sort({ created_at: -1 });
-                cache.set('aboutus', JSON.stringify(AboutusData));
-            }
+
+            AboutusData = await aboutus.findOne({ deleted_at: null }).sort({ created_at: -1 });
             console.log(AboutusData, 'AboutusData')
             return res.status(200).json({ AboutusData });
         }
@@ -1708,7 +1666,6 @@ apicontroller.delete_aboutus = async (req, res) => {
             deleted_at: Date(),
         };
         const newsave = await aboutus.findByIdAndUpdate(id, delete_Aboutus);
-        cache.del('aboutus');
         res.status(200).json(newsave)
 
     } catch (error) {
@@ -1739,7 +1696,6 @@ apicontroller.aboutus_update = async (req, res) => {
             updated_at: Date(),
         };
         const newsave = await aboutus.findByIdAndUpdate(id, updateAboutus, { new: true });
-        cache.del('aboutus');
         res.status(200).json(newsave);
 
     } catch (error) {
@@ -1758,7 +1714,6 @@ apicontroller.slider = async (req, res) => {
         });
 
         const Slider = await sliderData.save();
-        cache.del('sildeimage');
         res.status(200).json(Slider);
 
     } catch (error) {
@@ -1769,15 +1724,8 @@ apicontroller.slider = async (req, res) => {
 
 apicontroller.listslider = async (req, res) => {
     try {
-        let sliderData;
-        if (cache.has('sildeimage')) {
-            console.log('Cache has sildeimage')
-            sliderData = JSON.parse(cache.get('sildeimage'));
-        } else {
-            console.log('Cache has no sildeimage');
-            sliderData = await slider.find({ deleted_at: null }).sort({ created_at: -1 });
-            cache.set('sildeimage', JSON.stringify(sliderData));
-        }
+         
+        let sliderData = await slider.find({ deleted_at: null }).sort({ created_at: -1 });
         return res.status(200).json(sliderData);
 
     } catch (error) {
@@ -1871,7 +1819,6 @@ apicontroller.delete_slider = async (req, res) => {
         };
 
         const newsave = await slider.findByIdAndUpdate(id, delete_slider);
-        cache.del('sildeimage');
         res.status(200).json(newsave)
 
     } catch (error) {
@@ -2146,16 +2093,9 @@ apicontroller.checkMobileNo = async (req, res) => {
 
 apicontroller.news = async (req, res) => {
     try {
-        let newsdata;
-        if (cache.has('news')) {
-            console.log('Cache has news')
-            newsdata = JSON.parse(cache.get('news'));
-        } else {
-            console.log('Cache has no news');
-            newsdata = await news.find({ deleted_at: null }).sort({ created_at: -1 })
-            cache.set('news', JSON.stringify(newsdata));
-        }
-        //   console.log(newsdata)
+      
+        let newsdata = await news.find({ deleted_at: null }).sort({ created_at: -1 })
+        console.log(newsdata)
         return res.status(200).json(newsdata);
     } catch (error) {
         console.log(error)
@@ -2164,20 +2104,22 @@ apicontroller.news = async (req, res) => {
 }
 
 apicontroller.newsPost = async (req, res) => {
+
+    const descriptionE = sanitizeHtml(req.body.descriptionE);
+    const descriptionG = sanitizeHtml(req.body.descriptionG);
     try {
         const newNews = new news({
             titleE: req.body.titleE,
-            descriptionE: req.body.descriptionE,
+            descriptionE: descriptionE,
             titleG: req.body.titleG,
-            descriptionG: req.body.descriptionG,
-            image: req.body?.image ||"news_defult.png",
+            descriptionG: descriptionG,
+            image: req.body?.image || "news_defult.png",
             createdBy: req.body.created_by
         });
         const registrationTokens = await user.find({ deleted_at: null, parent_id: null, });
         const registrationToken = registrationTokens.map((element) => element.device_token);
         const filteredTokens = registrationToken.filter(token => token !== null && token !== undefined);
         const uniqueTokens = [...new Set(filteredTokens)];
-        cache.del('news');
         const newsData = await newNews.save();
 
         return res.status(200).json(newsData);
@@ -2212,7 +2154,6 @@ apicontroller.news_update = async (req, res) => {
             updated_at: Date(),
         };
         const newsave = await news.findByIdAndUpdate(id, updateNews, { new: true });
-        cache.del('news');
         res.status(200).json(newsave);
 
     } catch (error) {
@@ -2229,7 +2170,6 @@ apicontroller.news_delete = async (req, res) => {
         };
 
         const newsave = await news.findByIdAndUpdate(id, news_delete);
-        cache.del('news');
         res.status(200).json(newsave)
 
     } catch (error) {
@@ -2578,7 +2518,6 @@ apicontroller.deletefaq = async (req, res) => {
             deleted_at: Date(),
         };
         const deletedData = await Faq.findByIdAndUpdate(id, deletefaq);
-        cache.del('Faq');
         res.status(200).json(deletedData);
     }
     catch (error) {
@@ -2651,7 +2590,6 @@ apicontroller.deleteEmailSupport = async (req, res) => {
             deleted_at: Date(),
         };
         const EmailsupportData = await Emailsupport.findByIdAndUpdate(id, delete_email);
-        cache.del('Emailsupport');
         res.status(200).json(Emailsupport)
 
     } catch (error) {
