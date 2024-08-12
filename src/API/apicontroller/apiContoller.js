@@ -188,7 +188,7 @@ apicontroller.register = async (req, res) => {
 };
 
 apicontroller.login = async (req, res) => {
-   
+
     try {
         const personal_email = req.body.email;
         const password = req.body.password;
@@ -305,7 +305,7 @@ apicontroller.adduser = async (req, res) => {
                 middlename: userDataItem.middlename,
                 password: isFirstData ? userDataItem.password : null,
                 dob: userDataItem.dob,
-                photo: isFirstData ? userDataItem.photo : null,
+                photo: isFirstData ? userDataItem.photo : "profile_img.png",
                 state: userDataItem.state,
                 city: userDataItem.city,
                 pincode: userDataItem.pincode,
@@ -351,7 +351,13 @@ function formatDate(date) {
 
     return formattedDate;
 }
-
+function generateUserCode(lastCode) {
+    const prefix = 'ASGPS';
+    const lastNumber = parseInt(lastCode.substr(prefix.length), 10);
+    const newNumber = lastNumber + 1;
+    const newCode = `${prefix}${String(newNumber).padStart(4, '0')}`;
+    return newCode;
+}
 apicontroller.user_register = async (req, res) => {
     const data = req.body.PerentsData;
     console.log(data.payment_id, 'data payment_id')
@@ -392,7 +398,7 @@ apicontroller.user_register = async (req, res) => {
 
 
         let lastUser = await user.findOne({ deleted_at: null, parent_id: null }).sort({ _id: -1 }).limit(1);
-        lastUser = lastUser.personal_id;
+        lastUser = lastUser.personal_id 
 
         const newUserCode = generateUserCode(lastUser);
 
@@ -401,7 +407,7 @@ apicontroller.user_register = async (req, res) => {
                 firstname: data.firstname,
                 middlename: data.middlename,
                 lastname: data.lastname,
-                email: data.email,
+                email: data.email.toLowerCase(),
                 password: data.password,
                 dob: data.dob,
                 mobile_number: data.mobile_number,
@@ -430,7 +436,6 @@ apicontroller.user_register = async (req, res) => {
         res.status(400).json("Error", error);
 
     }
-
 }
 
 apicontroller.profile_image = async (req, res) => {
@@ -1547,7 +1552,7 @@ apicontroller.listcontact = async (req, res) => {
 
 apicontroller.CommitteeMembers = async (req, res) => {
     try {
-       
+
         const addCommitteeMembers = new CommitteeMembers({
             fullnameG: req.body.fullnameG,
             fullnameE: req.body.fullnameE,
@@ -1556,7 +1561,7 @@ apicontroller.CommitteeMembers = async (req, res) => {
             mobile_number: req.body.mobile_number,
             villageG: req.body.villageG,
             villageE: req.body.villageE,
-            image: req.body.image
+            image: req.body?.image || "profile_img.jpg"
         });
         const CommitteeMembersData = await addCommitteeMembers.save();
         cache.del('committeemembers');
@@ -2150,7 +2155,7 @@ apicontroller.news = async (req, res) => {
             newsdata = await news.find({ deleted_at: null }).sort({ created_at: -1 })
             cache.set('news', JSON.stringify(newsdata));
         }
-
+        //   console.log(newsdata)
         return res.status(200).json(newsdata);
     } catch (error) {
         console.log(error)
@@ -2165,7 +2170,7 @@ apicontroller.newsPost = async (req, res) => {
             descriptionE: req.body.descriptionE,
             titleG: req.body.titleG,
             descriptionG: req.body.descriptionG,
-            image: req.body.image,
+            image: req.body?.image ||"news_defult.png",
             createdBy: req.body.created_by
         });
         const registrationTokens = await user.find({ deleted_at: null, parent_id: null, });
@@ -3457,6 +3462,10 @@ apicontroller.webhook = async (req, res) => {
         res.status(400).send('Webhook verification failed');
 
     }
+
+
+
+
 }
 
 module.exports = apicontroller;

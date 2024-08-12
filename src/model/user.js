@@ -39,7 +39,7 @@ const UserSchema = mongoose.Schema({
         type: mongoose.ObjectId,
     },
     dob: {
-        type: String,
+        type: Date,
     },
     mobile_number: {
         type: Number,
@@ -47,7 +47,7 @@ const UserSchema = mongoose.Schema({
     },
     photo: {
         type: String,
-        default: 'profile_img.png'
+        default: 'profile_img.jpg'
     },
     personal_id: {
         type: String,
@@ -96,15 +96,15 @@ const UserSchema = mongoose.Schema({
         default: 'profile_banner.png'
     },
     created_at: {
-        type: String,
+        type: Date, 
         default: Date.now,
     },
     updated_at: {
-        type: String,
+        type: Date, 
         default: null,
     },
     deleted_at: {
-        type: String,
+        type: Date, 
         default: null,
     },
 

@@ -694,38 +694,49 @@ AdminController.createCommitee = async (req, res) => {
 };
 AdminController.postCommitee = async (req, res) => {
     try {
+        var committeeMembers ;
         if (!req.files || !req.files.image) {
-            throw new Error("No image file uploaded");
-        }
+             committeeMembers = {
+                fullnameG: req.body.fullnameG,
+                fullnameE: req.body.fullnameE,
+                roleG: req.body.roleG,
+                roleE: req.body.roleE,
+                mobile_number: req.body.mobile_number,
+                villageG: req.body.villageG,
+                villageE: req.body.villageE,
+            };
+        } else {
 
-        let file = req.files.image;
-        const uploadPath = path.join(__dirname, '../../uploads', file.name);
 
-        // Ensure directory exists
-        fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
 
-        // Save the file
-        await new Promise((resolve, reject) => {
-            file.mv(uploadPath, (err) => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve();
+            let file = req.files.image;
+            const uploadPath = path.join(__dirname, '../../uploads', file.name);
+
+            // Ensure directory exists
+            fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
+
+            // Save the file
+            await new Promise((resolve, reject) => {
+                file.mv(uploadPath, (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                });
             });
-        });
 
-        const committeeMembers = {
-            fullnameG: req.body.fullnameG,
-            fullnameE: req.body.fullnameE,
-            roleG: req.body.roleG,
-            roleE: req.body.roleE,
-            mobile_number: req.body.mobile_number,
-            villageG: req.body.villageG,
-            villageE: req.body.villageE,
-            image: file.name
-        };
+          committeeMembers = {
+                fullnameG: req.body.fullnameG,
+                fullnameE: req.body.fullnameE,
+                roleG: req.body.roleG,
+                roleE: req.body.roleE,
+                mobile_number: req.body.mobile_number,
+                villageG: req.body.villageG,
+                villageE: req.body.villageE,
+                image: file.name
+            };
 
-
+        }
         const response = await axios.post(`${baseURL}/api/committee_members/`, committeeMembers);
         console.log(response, "response")
         const data = response.data;
@@ -840,34 +851,44 @@ AdminController.createNews = async (req, res) => {
 
 AdminController.addNews = async (req, res) => {
     try {
+        var newsData;
         if (!req.files || !req.files.image) {
-            throw new Error("No image file uploaded");
+            newsData = {
+                titleE: req.body.titleE,
+                titleG: req.body.titleG,
+                descriptionE: req.body.descriptionE,
+                descriptionG: req.body.descriptionG,
+                created_by: req.body.created_by
+            };
+        }else{
+            let file = req.files.image;
+            const uploadPath = path.join(__dirname, '../../uploads', file.name);
+    
+            // Ensure directory exists
+            fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
+    
+            // Save the file
+            await new Promise((resolve, reject) => {
+                file.mv(uploadPath, (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                });
+            });
+    
+            newsData = {
+                titleE: req.body.titleE,
+                titleG: req.body.titleG,
+                image: file.name,
+                descriptionE: req.body.descriptionE,
+                descriptionG: req.body.descriptionG,
+                created_by: req.body.created_by
+            };
+
         }
 
-        let file = req.files.image;
-        const uploadPath = path.join(__dirname, '../../uploads', file.name);
-
-        // Ensure directory exists
-        fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
-
-        // Save the file
-        await new Promise((resolve, reject) => {
-            file.mv(uploadPath, (err) => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve();
-            });
-        });
-
-        const newsData = {
-            titleE: req.body.titleE,
-            titleG: req.body.titleG,
-            image: file.name,
-            descriptionE: req.body.descriptionE,
-            descriptionG: req.body.descriptionG,
-            created_by: req.body.created_by
-        };
+       
 
         axios.post(`${baseURL}/api/news/`, newsData);
         res.redirect('/news');

@@ -20,6 +20,7 @@ const NewsSchema = mongoose.Schema({
     },
     image: {
         type: String,
+        default: "news_defult.png"
     },
     created_at: {
         type: String,

@@ -27,6 +27,7 @@ const CommitteeMembersSchema = mongoose.Schema({
     },
     image: {
         type: String,
+        default: "profile_img.jpg"
     },
     created_at: {
         type: String,
