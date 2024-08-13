@@ -49,6 +49,8 @@ const { getTargetDate } = require('../../utils/helper')
 const moment = require('moment')
 const Locations = require('../../model/location')
 const sanitizeHtml = require('sanitize-html');
+const genarateToken = require('../../utils/genarateToken')
+
 firebase_admin.initializeApp({
     credential: firebase_admin.credential.cert(serviceAccount),
 });
@@ -200,11 +202,7 @@ apicontroller.login = async (req, res) => {
             const isMatch = await bcrypt.compare(password, users.password);
 
             if (isMatch) {
-                var token = jwt.sign({
-                    _id: users._id
-                }, process.env.JWT_SECRET, {
-                    expiresIn: "5d",
-                });
+                var token = genarateToken(users)
                 const userdetails = await admin.findByIdAndUpdate(users._id, { token });
                 res.status(200).json({ login_status: "login success", userdetails });
             } else {
@@ -357,9 +355,9 @@ function generateUserCode(lastCode) {
     const newCode = `${prefix}${String(newNumber).padStart(4, '0')}`;
     return newCode;
 }
+
 apicontroller.user_register = async (req, res) => {
     const data = req.body.PerentsData;
-    console.log(data.payment_id, 'data payment_id')
     //statical data if needed
     // data.payment_id = '64956f9a074819de3e34ed34';
     // data.device_token = '64956f9a074819de3e34ed34ssdas3445';
@@ -1724,7 +1722,7 @@ apicontroller.slider = async (req, res) => {
 
 apicontroller.listslider = async (req, res) => {
     try {
-         
+
         let sliderData = await slider.find({ deleted_at: null }).sort({ created_at: -1 });
         return res.status(200).json(sliderData);
 
@@ -1733,6 +1731,7 @@ apicontroller.listslider = async (req, res) => {
     }
 
 }
+
 apicontroller.listsettings = async (req, res) => {
     try {
         const amount = req.query.amount;
@@ -2093,9 +2092,8 @@ apicontroller.checkMobileNo = async (req, res) => {
 
 apicontroller.news = async (req, res) => {
     try {
-      
+
         let newsdata = await news.find({ deleted_at: null }).sort({ created_at: -1 })
-        console.log(newsdata)
         return res.status(200).json(newsdata);
     } catch (error) {
         console.log(error)
@@ -2965,7 +2963,7 @@ apicontroller.registerBusiness = async (req, res) => {
 
         if (req.files && req.files?.businessLogo) {
             let file = req.files.businessLogo;
-            const fileName = file.name + Date.now()
+            const fileName = Date.now() + file.name
             file.mv("uploads/" + fileName, function (err) {
                 if (err) {
                     console.log("Image upload failed")
@@ -3114,6 +3112,8 @@ apicontroller.allBusinesses = async (req, res) => {
                 ]
             }
         const businesses = await Business.find(payload)
+
+        console.log(businesses, 'businesses')
 
         res.status(200).json({ businesses })
     } catch (error) {

@@ -14,7 +14,7 @@ router.get('/template/:id/:position' , AdminController.businessTemplates);
 //  login and logout rote.
 router.get('/',  AdminController.loginPage);
 router.post('/' , AdminController.login);
-router.get('/logout', AdminController.logoutuser);
+router.get('/logout',  AdminController.logoutuser);
 
 //forgotpassword
 router.get('/forgotpass',  AdminController.getforgotpass);

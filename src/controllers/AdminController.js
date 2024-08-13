@@ -16,6 +16,7 @@ var helpers = require("../helpers");
 const fs = require('fs');
 const Condition = require('../model/condition');
 const { Readable } = require('stream');
+
 require("dotenv").config();
 const baseURL = process.env.BASE_URL;
 const API_KEY = process.env.API_KEY;
@@ -28,10 +29,8 @@ const AdminController = {};
  * @param {Object} res - Express response object.
  */
 
-
 AdminController.loginPage = async (req, res) => {
-    sess = req.session;
-    if (sess?.userdetails) {
+    if (req.cookies?.token !== "" && req.cookies?.token !== undefined) {
         res.redirect('/admin/index')
     } else {
         res.render('login', { failEmail: '', failPass: '' })
@@ -47,20 +46,21 @@ AdminController.login = async (req, res) => {
             password: req.body.password,
         };
 
-        const response = await axios.post(`${baseURL}/api/login`,Logindata,{headers: {'x-api-key': API_KEY}});
-        //   console.log(response,'response')
+        const response = await axios.post(`${baseURL}/api/login`, Logindata, { headers: { 'x-api-key': API_KEY } });
         if (response.data.emailError === "Invalid email") {
             req.flash("failEmail", "Invalid email");
             return res.redirect("/");
         }
 
         if (response.data.login_status === "login success") {
-            req.session.userdetails = response.data.userdetails;
-            res.cookie("jwt", response.data.token, {
-                maxAge: 1000 * 60 * 60 * 24, // 1 day
-                httpOnly: true,
-            });
+            // req.session.userdetails = response.data.userdetails;
+            // res.cookie("jwt", response.data.token, {
+            //     maxAge: 1000 * 60 * 60 * 24, // 1 day
+            //     httpOnly: true,
+            // });
 
+            var token = response.data.userdetails.token;
+            res.cookie('token', token)
             return res.redirect("/admin/index");
         }
 
@@ -73,15 +73,22 @@ AdminController.login = async (req, res) => {
 };
 
 AdminController.logoutuser = (req, res) => {
-    if (req.session) {
-        req.session.destroy((err) => {
-            if (err) {
-                res.status(400).send(err);
-            } else {
-                res.clearCookie('cookieName');
-                res.redirect("/");
-            }
-        });
+    // if (req.session) {
+    //     req.session.destroy((err) => {
+    //         if (err) {
+    //             res.status(400).send(err);
+    //         } else {
+    //             res.clearCookie('cookieName');
+    //             res.redirect("/");
+    //         }
+    //     });
+    // }
+    try {
+        res.cookie('token', "")
+        res.redirect("/");
+
+    } catch (err) {
+        console.log("Somthing went wrong while logout:" + err.message)
     }
 };
 
@@ -91,7 +98,7 @@ AdminController.getforgotpass = async (req, res) => {
 
 AdminController.users = async (req, res) => {
     try {
-        const response = await axios.get(`${baseURL}/api/user_listing/`);
+        const response = await axios.get(`${baseURL}/api/user_listing/`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.render('pages/users', { users: data });
     } catch (error) {
@@ -140,7 +147,7 @@ AdminController.admins = async (req, res) => {
 };
 AdminController.users = async (req, res) => {
     try {
-        const response = await axios.get(`${baseURL}/api/user_listing/`);
+        const response = await axios.get(`${baseURL}/api/user_listing/`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.render('pages/users', { users: data });
     } catch (error) {
@@ -151,7 +158,7 @@ AdminController.users = async (req, res) => {
 };
 AdminController.createUser = async (req, res) => {
     try {
-        const location = await axios.get(`${baseURL}/api/locationdata`);
+        const location = await axios.get(`${baseURL}/api/locationdata`, { headers: { 'x-api-key': API_KEY } });
         // const meritalStatus = await axios.get(`${baseURL}/api/data`);
         // console.log(location, 'location')
         res.render('pages/createUser', { village: location.data });
@@ -167,7 +174,7 @@ AdminController.createUser = async (req, res) => {
 AdminController.addUser = async (req, res) => {
     console.log(req.body, 'sdd')
     try {
-        const response = await axios.post(`${baseURL}/api/user_register/`, { PerentsData: req.body });
+        const response = await axios.post(`${baseURL}/api/user_register/`, { PerentsData: req.body }, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.redirect('/users');
     } catch (error) {
@@ -180,7 +187,7 @@ AdminController.addUser = async (req, res) => {
 AdminController.editUser = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.get(`${baseURL}/api/user-edit/${id}`);
+        const response = await axios.get(`${baseURL}/api/user-edit/${id}`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
 
         const location = await axios.get(`${baseURL}/api/locationdata`);
@@ -196,7 +203,7 @@ AdminController.editUser = async (req, res) => {
 AdminController.updateUser = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/user-update/${id}`, req.body);
+        const response = await axios.post(`${baseURL}/api/user-update/${id}`, req.body, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.redirect('/users');
     } catch (error) {
@@ -209,7 +216,7 @@ AdminController.updateUser = async (req, res) => {
 AdminController.deleteUser = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/user-delete/${id}`);
+        const response = await axios.post(`${baseURL}/api/user-delete/${id}`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.redirect('/users');
     } catch (error) {
@@ -223,7 +230,7 @@ AdminController.viewTree = async (req, res) => {
     // console.log(req.params.id,'req.params.id')
     try {
         const id = req.params.id;
-        const response = await axios.get(`${baseURL}/api/familyData/${id}`);
+        const response = await axios.get(`${baseURL}/api/familyData/${id}`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.render('pages/userTree', { familyData: JSON.stringify(data) });
     } catch (error) {
@@ -240,7 +247,7 @@ AdminController.nodeDetails = async (req, res) => {
         const id = req.params.id;
         var village;
         var userDetails;
-        const response = await axios.get(`${baseURL}/api/viewUser/${id}`);
+        const response = await axios.get(`${baseURL}/api/viewUser/${id}`,{ headers: { 'x-api-key': API_KEY } });
         const data = response.data;
 
         const formattedDate = new Date(data.User.dob).toISOString().split('T')[0];
@@ -280,8 +287,8 @@ AdminController.create_child = async (req, res) => {
 
     try {
         const id = req.params.id;
-        const parentData = await axios.get(`${baseURL}/api/add_childUser/${id}`);
-        const relationshipData = await axios.get(`${baseURL}/api/relationship-data`);
+        const parentData = await axios.get(`${baseURL}/api/add_childUser/${id}`, { headers: { 'x-api-key': API_KEY } });
+        const relationshipData = await axios.get(`${baseURL}/api/relationship-data`, { headers: { 'x-api-key': API_KEY } });
         res.render('pages/createChild', { parentData: parentData.data.parentData, relationship: relationshipData.data });
     } catch (error) {
         // Handle rendering errors
@@ -323,7 +330,7 @@ AdminController.addChild = async (req, res) => {
             };
         }
         console.log(childData, 'childData')
-        const response = await axios.post(`${baseURL}/api/addfamily/${id}`, childData);
+        const response = await axios.post(`${baseURL}/api/addfamily/${id}`, childData, { headers: { 'x-api-key': API_KEY } });
         res.redirect(`/viewTree/${response.data.parentId}`);
     } catch (error) {
         // Handle rendering errors
@@ -337,7 +344,7 @@ AdminController.addChild = async (req, res) => {
 
 AdminController.abouts = async (req, res) => {
     try {
-        const response = await helpers.axiosdata("get", "/api/aboutus")
+        const response = await helpers.axiosdata("get", "/api/aboutus", { headers: { 'x-api-key': API_KEY } })
         // const response = await axios.get(`${baseURL}/api/aboutus/`, headers = {
         //     "isadmin": true,
         // },)
@@ -393,7 +400,7 @@ AdminController.addAboutUsDetails = async (req, res) => {
             image: file.name
         };
 
-        await axios.post(`${baseURL}/api/aboutus/`, aboutusData);
+        await axios.post(`${baseURL}/api/aboutus/`, aboutusData, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/abouts');
     } catch (error) {
         // Handle rendering errors
@@ -405,7 +412,7 @@ AdminController.addAboutUsDetails = async (req, res) => {
 AdminController.editAboutus = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.get(`${baseURL}/api/aboutus-edit/${id}`);
+        const response = await axios.get(`${baseURL}/api/aboutus-edit/${id}`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.render('pages/editAboutus', { aboutusData: data });
     } catch (error) {
@@ -448,7 +455,7 @@ AdminController.updateAboutus = async (req, res) => {
             aboutusData.image = image.name;
         }
 
-        const response = await axios.post(`${baseURL}/api/aboutus-edit/${id}`, aboutusData);
+        const response = await axios.post(`${baseURL}/api/aboutus-edit/${id}`, aboutusData, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.redirect('/abouts');
     } catch (error) {
@@ -461,7 +468,7 @@ AdminController.updateAboutus = async (req, res) => {
 AdminController.deleteAboutus = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/delete_aboutus/${id}`);
+        const response = await axios.post(`${baseURL}/api/delete_aboutus/${id}`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.redirect('/abouts');
     } catch (error) {
@@ -475,7 +482,7 @@ AdminController.deleteAboutus = async (req, res) => {
 
 AdminController.villages = async (req, res) => {
     try {
-        const response = await axios.get(`${baseURL}/api/location/`);
+        const response = await axios.get(`${baseURL}/api/location/`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.render('pages/villages', { locations: data.village });
     } catch (error) {
@@ -521,7 +528,7 @@ AdminController.addVillages = async (req, res) => {
             image: file.name
         };
 
-        const response = await axios.post(`${baseURL}/api/location/`, villageData);
+        const response = await axios.post(`${baseURL}/api/location/`, villageData, { headers: { 'x-api-key': API_KEY } });
         //    console.log(response,'es')
         res.redirect('/villages');
     } catch (error) {
@@ -534,7 +541,7 @@ AdminController.addVillages = async (req, res) => {
 AdminController.editVillages = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.get(`${baseURL}/api/location-edit/${id}`);
+        const response = await axios.get(`${baseURL}/api/location-edit/${id}`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.render('pages/editVillages', { vlilage: data });
     } catch (error) {
@@ -576,7 +583,7 @@ AdminController.updateVillages = async (req, res) => {
             villageData.image = image.name;
         }
 
-        const response = await axios.post(`${baseURL}/api/location-edit/${id}`, villageData);
+        const response = await axios.post(`${baseURL}/api/location-edit/${id}`, villageData, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.redirect('/villages');
     } catch (error) {
@@ -588,7 +595,7 @@ AdminController.updateVillages = async (req, res) => {
 AdminController.deleteVillages = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/location-delete/${id}`);
+        const response = await axios.post(`${baseURL}/api/location-delete/${id}`, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/villages');
     } catch (error) {
         // Handle rendering errors
@@ -599,7 +606,7 @@ AdminController.deleteVillages = async (req, res) => {
 
 AdminController.slider = async (req, res) => {
     try {
-        const response = await axios.get(`${baseURL}/api/slider`);
+        const response = await axios.get(`${baseURL}/api/slider`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.render('pages/slider', { sliders: data });
 
@@ -650,7 +657,7 @@ AdminController.addSlider = async (req, res) => {
         };
 
 
-        const response = await axios.post(`${baseURL}/api/slider/`, sliderData);
+        const response = await axios.post(`${baseURL}/api/slider/`, sliderData, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         console.log(data);
 
@@ -665,7 +672,7 @@ AdminController.addSlider = async (req, res) => {
 AdminController.deleteSlider = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/delete_slider/${id}`);
+        const response = await axios.post(`${baseURL}/api/delete_slider/${id}`, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/slider');
     } catch (error) {
         console.error("Error", error);
@@ -675,7 +682,7 @@ AdminController.deleteSlider = async (req, res) => {
 
 AdminController.committee = async (req, res) => {
     try {
-        const response = await axios.get(`${baseURL}/api/committee_members/`);
+        const response = await axios.get(`${baseURL}/api/committee_members/`, { headers: { 'x-api-key': API_KEY } });
         const committeeMembers = response.data;
         res.render('pages/committee', { committeeMembers: committeeMembers });
     } catch (error) {
@@ -694,9 +701,9 @@ AdminController.createCommitee = async (req, res) => {
 };
 AdminController.postCommitee = async (req, res) => {
     try {
-        var committeeMembers ;
+        var committeeMembers;
         if (!req.files || !req.files.image) {
-             committeeMembers = {
+            committeeMembers = {
                 fullnameG: req.body.fullnameG,
                 fullnameE: req.body.fullnameE,
                 roleG: req.body.roleG,
@@ -725,7 +732,7 @@ AdminController.postCommitee = async (req, res) => {
                 });
             });
 
-          committeeMembers = {
+            committeeMembers = {
                 fullnameG: req.body.fullnameG,
                 fullnameE: req.body.fullnameE,
                 roleG: req.body.roleG,
@@ -737,7 +744,7 @@ AdminController.postCommitee = async (req, res) => {
             };
 
         }
-        const response = await axios.post(`${baseURL}/api/committee_members/`, committeeMembers);
+        const response = await axios.post(`${baseURL}/api/committee_members/`, committeeMembers, { headers: { 'x-api-key': API_KEY } });
         console.log(response, "response")
         const data = response.data;
         console.log(data);
@@ -752,9 +759,8 @@ AdminController.postCommitee = async (req, res) => {
 AdminController.editCommitee = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.get(`${baseURL}/api/committee_members-edit/${id}`);
+        const response = await axios.get(`${baseURL}/api/committee_members-edit/${id}`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
-        console.log(data, '::::::Data')
         res.render('pages/editCommitee', { committeeMembers: data });
     } catch (error) {
         console.error("Error", error);
@@ -803,7 +809,7 @@ AdminController.updateCommitee = async (req, res) => {
             commiteeData.image = image.name;
         }
 
-        const response = await axios.post(`${baseURL}/api/committeemembers-edit/${id}`, commiteeData);
+        const response = await axios.post(`${baseURL}/api/committeemembers-edit/${id}`, commiteeData, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         console.log(data);
         res.redirect('/committee');
@@ -816,7 +822,7 @@ AdminController.updateCommitee = async (req, res) => {
 AdminController.deleteCommitee = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/delete_committee_members/${id}`);
+        const response = await axios.post(`${baseURL}/api/delete_committee_members/${id}`, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/committee');
     } catch (error) {
         console.error("Error", error);
@@ -828,7 +834,7 @@ AdminController.deleteCommitee = async (req, res) => {
 
 AdminController.news = async (req, res) => {
     try {
-        const response = await axios.get(`${baseURL}/api/news`);
+        const response = await axios.get(`${baseURL}/api/news`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
 
         res.render('pages/news', { newsData: data });
@@ -860,13 +866,13 @@ AdminController.addNews = async (req, res) => {
                 descriptionG: req.body.descriptionG,
                 created_by: req.body.created_by
             };
-        }else{
+        } else {
             let file = req.files.image;
             const uploadPath = path.join(__dirname, '../../uploads', file.name);
-    
+
             // Ensure directory exists
             fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
-    
+
             // Save the file
             await new Promise((resolve, reject) => {
                 file.mv(uploadPath, (err) => {
@@ -876,7 +882,7 @@ AdminController.addNews = async (req, res) => {
                     resolve();
                 });
             });
-    
+
             newsData = {
                 titleE: req.body.titleE,
                 titleG: req.body.titleG,
@@ -888,9 +894,9 @@ AdminController.addNews = async (req, res) => {
 
         }
 
-       
 
-        axios.post(`${baseURL}/api/news/`, newsData);
+
+        axios.post(`${baseURL}/api/news/`, newsData, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/news');
     } catch (error) {
         // Handle rendering errors
@@ -902,7 +908,7 @@ AdminController.addNews = async (req, res) => {
 AdminController.editNews = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.get(`${baseURL}/api/news-edit/${id}`);
+        const response = await axios.get(`${baseURL}/api/news-edit/${id}`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.render('pages/editNews', { newsData: data });
     } catch (error) {
@@ -950,7 +956,7 @@ AdminController.updateNews = async (req, res) => {
             newsData.image = image.name;
         }
 
-        const response = await axios.post(`${baseURL}/api/news-edit/${id}`, newsData);
+        const response = await axios.post(`${baseURL}/api/news-edit/${id}`, newsData, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         console.log(data);
         res.redirect('/news');
@@ -963,7 +969,7 @@ AdminController.updateNews = async (req, res) => {
 AdminController.deleteNews = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/news-delete/${id}`);
+        const response = await axios.post(`${baseURL}/api/news-delete/${id}`, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/news');
     } catch (error) {
         console.error("Error", error);
@@ -982,7 +988,7 @@ AdminController.password = async (req, res) => {
 };
 AdminController.changeuserPassword = async (req, res) => {
     try {
-        const response = await axios.post(`${baseURL}/api/changePassword`, req.body);
+        const response = await axios.post(`${baseURL}/api/changePassword`, req.body, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         console.log(data, 'data')
         res.redirect('/changeuserPassword');
@@ -998,7 +1004,7 @@ AdminController.changeuserPassword = async (req, res) => {
 AdminController.faqs = async (req, res) => {
 
     try {
-        const response = await axios.get(`${baseURL}/api/faq`);
+        const response = await axios.get(`${baseURL}/api/faq`, { headers: { 'x-api-key': API_KEY } });
         const faqsData = response.data;
         // console.log(settingsData, 'settingsData')
         res.render('pages/faqs', { faqsData: faqsData });
@@ -1021,7 +1027,7 @@ AdminController.createFaqs = async (req, res) => {
 
 AdminController.addFaqs = async (req, res) => {
     try {
-        axios.post(`${baseURL}/api/faq/`, req.body);
+        axios.post(`${baseURL}/api/faq/`, req.body, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/faqs');
     } catch (error) {
         // Handle rendering errors
@@ -1033,7 +1039,7 @@ AdminController.addFaqs = async (req, res) => {
 AdminController.editFaqs = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.get(`${baseURL}/api/faq-edit/${id}`);
+        const response = await axios.get(`${baseURL}/api/faq-edit/${id}`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.render('pages/editFaqs', { faqsData: data });
     } catch (error) {
@@ -1046,7 +1052,7 @@ AdminController.editFaqs = async (req, res) => {
 AdminController.updateFaqs = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/faq-edit/${id}`, req.body);
+        const response = await axios.post(`${baseURL}/api/faq-edit/${id}`, req.body, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.redirect('/faqs');
     } catch (error) {
@@ -1059,7 +1065,7 @@ AdminController.updateFaqs = async (req, res) => {
 AdminController.deleteFaqs = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/faq-delete/${id}`);
+        const response = await axios.post(`${baseURL}/api/faq-delete/${id}`, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/faqs');
     } catch (error) {
         console.error("Error", error);
@@ -1070,7 +1076,7 @@ AdminController.deleteFaqs = async (req, res) => {
 
 AdminController.settings = async (req, res) => {
     try {
-        const response = await axios.get(`${baseURL}/api/listsettings`);
+        const response = await axios.get(`${baseURL}/api/listsettings`, { headers: { 'x-api-key': API_KEY } });
         const settingsData = response.data;
         res.render('pages/settings', { SettingsData: settingsData });
     } catch (error) {
@@ -1119,7 +1125,7 @@ AdminController.createSetting = async (req, res) => {
             settingData.value = value;
         }
 
-        const response = await axios.post(`${baseURL}/api/createSetting`, settingData);
+        const response = await axios.post(`${baseURL}/api/createSetting`, settingData, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         console.log(data, 'data');
         res.redirect('/settings');
@@ -1132,7 +1138,7 @@ AdminController.createSetting = async (req, res) => {
 AdminController.editSetting = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.get(`${baseURL}/api/editSetting/${id}`);
+        const response = await axios.get(`${baseURL}/api/editSetting/${id}`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.render('pages/editSetting', { settingData: data });
     } catch (error) {
@@ -1173,7 +1179,7 @@ AdminController.updateSetting = async (req, res) => {
             settingData.value = value;
         }
 
-        const response = await axios.post(`${baseURL}/api/editSetting/${id}`, settingData);
+        const response = await axios.post(`${baseURL}/api/editSetting/${id}`, settingData, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         console.log(data, 'data');
         res.redirect('/settings');
@@ -1186,7 +1192,7 @@ AdminController.updateSetting = async (req, res) => {
 AdminController.deleteSetting = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/deleteSetting/${id}`);
+        const response = await axios.post(`${baseURL}/api/deleteSetting/${id}`, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/settings');
     } catch (error) {
         console.error("Error", error);
@@ -1206,7 +1212,7 @@ AdminController.payments = async (req, res) => {
 };
 AdminController.contacts = async (req, res) => {
     try {
-        const response = await axios.get(`${baseURL}/api/email_support`);
+        const response = await axios.get(`${baseURL}/api/email_support`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
         res.render('pages/contacts', { contactData: data });
     } catch (error) {
@@ -1219,7 +1225,7 @@ AdminController.contacts = async (req, res) => {
 AdminController.deletContacts = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/deleteEmailSupport/${id}`);
+        const response = await axios.post(`${baseURL}/api/deleteEmailSupport/${id}`, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/contacts');
     } catch (error) {
         console.error("Error", error);
@@ -1357,7 +1363,7 @@ AdminController.delete_joinpage = async (req, res) => {
 
 AdminController.termsandcondition = async (req, res) => {
     try {
-        const response = await axios.get(`${baseURL}/api/termsandcondition`);
+        const response = await axios.get(`${baseURL}/api/termsandcondition`, { headers: { 'x-api-key': API_KEY } });
         const termsandcondition = response.data;
         res.render('pages/termsandcondition', { termsandcondition })
     } catch (error) {
@@ -1382,7 +1388,7 @@ AdminController.addTermsandcondition = async (req, res) => {
             descriptionE: req.body.descriptionE,
             descriptionG: req.body.descriptionG,
         };
-        axios.post(`${baseURL}/api/createTermsandcondition`, termsandconditionData);
+        axios.post(`${baseURL}/api/createTermsandcondition`, termsandconditionData,{ headers: { 'x-api-key': API_KEY } } );
         res.redirect('/termsandcondition')
     } catch (error) {
         console.log(error)
@@ -1392,7 +1398,7 @@ AdminController.addTermsandcondition = async (req, res) => {
 AdminController.editTermsandcondition = async (req, res) => {
     var id = req.params.id
     try {
-        const response = await axios.get(`${baseURL}/api/editTermsandcondition/${id}`);
+        const response = await axios.get(`${baseURL}/api/editTermsandcondition/${id}`, { headers: { 'x-api-key': API_KEY } });
         const termsandcondition = response.data;
         res.render('pages/editTermsandcondition', { termsandcondition })
     } catch (error) {
@@ -1409,7 +1415,7 @@ AdminController.updateTermsandcondition = async (req, res) => {
             descriptionE: req.body.descriptionE,
             descriptionG: req.body.descriptionG,
         };
-        axios.post(`${baseURL}/api/editTermsandcondition/${id}`, termsandconditionData);
+        axios.post(`${baseURL}/api/editTermsandcondition/${id}`, termsandconditionData, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/termsandcondition')
     } catch (error) {
         console.log(error)
@@ -1422,7 +1428,7 @@ AdminController.deleteTermsandcondition = async (req, res) => {
         const delete_termsandcondition = {
             deleted_at: Date(),
         };
-        await Condition.findByIdAndUpdate(id, delete_termsandcondition);
+        await Condition.findByIdAndUpdate(id, delete_termsandcondition, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/termsandcondition')
     } catch (error) {
         console.log(error)
@@ -1430,12 +1436,12 @@ AdminController.deleteTermsandcondition = async (req, res) => {
 }
 
 AdminController.plans = async (req, res) => {
-    const response = await axios.get(`${baseURL}/api/getPlans/`);
+    const response = await axios.get(`${baseURL}/api/getPlans/`, { headers: { 'x-api-key': API_KEY } });
     res.render("pages/plans", { plans: response.data.plans })
 }
 
 AdminController.businessListing = async (req, res) => {
-    const response = await axios.get(`${baseURL}/api/allBusinesses?pending=1`);
+    const response = await axios.get(`${baseURL}/api/allBusinesses?pending=1`, { headers: { 'x-api-key': API_KEY } });
     res.render("pages/business", { businesses: response.data.businesses })
 }
 
@@ -1464,7 +1470,7 @@ AdminController.businessTemplates = async (req, res) => {
 }
 
 AdminController.businesses = async (req, res) => {
-    const users = await axios.get(`${baseURL}/api/user_listing`)
+    const users = await axios.get(`${baseURL}/api/user_listing`, { headers: { 'x-api-key': API_KEY } })
     const errorMessage = req.flash('errorBusiness')
     res.render(`pages/addBusiness`, { users: users.data, errorMessage })
 }
@@ -1484,8 +1490,10 @@ AdminController.addBusinesses = async (req, res) => {
 
         await axios.post(`${baseURL}/api/registerBusiness`, req.body, {
             headers: {
-                contentType: "multipart/form-data"
-            }
+                contentType: "multipart/form-data",
+                'x-api-key': API_KEY,
+            },
+            
         })
         res.redirect('/businessListing')
     } catch (error) {
@@ -1497,8 +1505,8 @@ AdminController.addBusinesses = async (req, res) => {
 AdminController.editBusiness = async (req, res) => {
     try {
         const id = req.params.id
-        const business = await axios.get(`${baseURL}/api/getBusiness/${id}`)
-        const users = await axios.get(`${baseURL}/api/user_listing`)
+        const business = await axios.get(`${baseURL}/api/getBusiness/${id}`, { headers: { 'x-api-key': API_KEY } })
+        const users = await axios.get(`${baseURL}/api/user_listing`, { headers: { 'x-api-key': API_KEY } })
         const errorMessage = req.flash('businessEditError')
         res.status(200).render('pages/editBusiness', {
             business: business.data.businessData,
@@ -1525,7 +1533,7 @@ AdminController.updateBusiness = async (req, res) => {
             req.body['businessLogo'] = file.name
         }
 
-        await axios.post(`${baseURL}/api/editBusiness/${id}`, data)
+        await axios.post(`${baseURL}/api/editBusiness/${id}`, data, { headers: { 'x-api-key': API_KEY } })
         res.redirect('/businessListing')
     } catch (error) {
         req.flash('businessEditError', error.message)
