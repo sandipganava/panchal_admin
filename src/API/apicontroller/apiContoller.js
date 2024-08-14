@@ -362,7 +362,7 @@ apicontroller.user_register = async (req, res) => {
     // data.device_token = '64956f9a074819de3e34ed34ssdas3445';
     const userData = {};
     const { firstname, middlename, lastname, email, password, dob, mobile_number, address, city, state, pincode, education, job, marital_status, gender, locations_id, device_token, payment_id } = data;
-    const validationResult = await validation.performBlankValidations({ firstname, middlename, lastname, password, dob, mobile_number, address, city, state, pincode, education, job, marital_status, gender, locations_id, payment_id })
+    const validationResult = await validation.performBlankValidations({ firstname, middlename, lastname,email, password, dob, mobile_number, address, city, state, pincode, education, job, marital_status, gender, locations_id, payment_id })
 
     if (!validationResult.success) {
         console.log(validationResult.message)
@@ -440,7 +440,6 @@ apicontroller.profile_image = async (req, res) => {
             console.log("No Image uploaded")
             return res.status(400).json({ status: false, message: "No Image uploaded", showMessage: true });
         }
-        console.log(req.files, "req.filesreq.files")
         let file = req.files.image;
         file.mv("uploads/" + file.name, function (err) {
             if (err) {
@@ -773,7 +772,7 @@ apicontroller.addfamily = async (req, res) => {
             firstname: childData.firstname,
             middlename: childData.middlename,
             lastname: childData.lastname,
-            email: childData.email || null,
+            email: childData?.email || null,
             dob: childData.dob,
             gender: childData.gender,
             mobile_number: childData.mobile_number || null,

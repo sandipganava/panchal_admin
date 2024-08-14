@@ -32,7 +32,6 @@ const UserSchema = mongoose.Schema({
     },
     email: {
         type: String,
-        required: true,
         default: null
     },
     locations_id: {
@@ -43,7 +42,6 @@ const UserSchema = mongoose.Schema({
     },
     mobile_number: {
         type: Number,
-        required: true
     },
     photo: {
         type: String,
@@ -71,7 +69,6 @@ const UserSchema = mongoose.Schema({
     },
     address: {
         type: String,
-        required: true
     },
     relationship: {
         type: String,
