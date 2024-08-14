@@ -215,7 +215,6 @@ apicontroller.login = async (req, res) => {
 };
 
 apicontroller.userlogin = async (req, res) => {
-    console.log(req.body, 'req body')
     try {
         const { email_or_mobile, password, device_token } = req.body;
         const isEmail = typeof email_or_mobile === 'string' && email_or_mobile.includes('@');
@@ -361,7 +360,6 @@ apicontroller.user_register = async (req, res) => {
     //statical data if needed
     // data.payment_id = '64956f9a074819de3e34ed34';
     // data.device_token = '64956f9a074819de3e34ed34ssdas3445';
-    // console.log(data, 'user adat')
     const userData = {};
     const { firstname, middlename, lastname, email, password, dob, mobile_number, address, city, state, pincode, education, job, marital_status, gender, locations_id, device_token, payment_id } = data;
     const validationResult = await validation.performBlankValidations({ firstname, middlename, lastname, password, dob, mobile_number, address, city, state, pincode, education, job, marital_status, gender, locations_id, payment_id })
@@ -443,7 +441,6 @@ apicontroller.profile_image = async (req, res) => {
             return res.status(400).json({ status: false, message: "No Image uploaded", showMessage: true });
         }
         console.log(req.files, "req.filesreq.files")
-        console.log(req.body, "req.body")
         let file = req.files.image;
         file.mv("uploads/" + file.name, function (err) {
             if (err) {
@@ -556,7 +553,6 @@ apicontroller.search = async (req, res) => {
 
         if (searchData.length > 0) {
             const villageId = searchData[0]._id;
-            console.log(villageId, "village ID")
             const usersData = await user.aggregate([
                 {
                     $match: {
@@ -576,7 +572,6 @@ apicontroller.search = async (req, res) => {
                 },
 
             ]);
-            console.log(usersData, 'usersData by village')
             usersData.sort((a, b) => a.firstname.localeCompare(b.firstname, 'en', { sensitivity: 'base' }));
             res.status(200).json(usersData);
         } else {
@@ -604,7 +599,6 @@ apicontroller.search = async (req, res) => {
                 },
             ]);
 
-            console.log(usersData, 'usersData by search');
             // Sort usersData if needed
             usersData.sort((a, b) => a.firstname.localeCompare(b.firstname, 'en', { sensitivity: 'base' }));
 
@@ -659,7 +653,6 @@ apicontroller.villageByUser = async (req, res) => {
                 user.lastname = capitalizeFirstLetter(user.lastname.trim());
             }
         });
-        console.log(Useradd, 'user')
         res.status(200).json(Useradd)
 
         // const searchValue = req.body.searchValue;
@@ -773,7 +766,6 @@ apicontroller.add_childUser = async (req, res) => {
 apicontroller.addfamily = async (req, res) => {
     const parentId = req.params.id;
     const childData = req.body;
-    console.log(childData, "childData from api")
     try {
 
         const newUser = new user({
@@ -1047,7 +1039,6 @@ apicontroller.admin_update = async (req, res) => {
 
 apicontroller.location_update = async (req, res) => {
     var id = req.params.id
-    console.log(req.body, 'req.body')
     try {
         const updateLocation = {
             city: req.body.city,
@@ -1107,7 +1098,6 @@ apicontroller.update_email = async (req, res) => {
 
         const updetedData = await user.findByIdAndUpdate(id, { email: email });
         const mainData = await user.findOne({ _id: updetedData.id });
-        console.log(mainData, 'mainData')
         res.status(200).json({ status: true, userData: mainData, message: "Email Update Successfully" });
 
     } catch (error) {
@@ -1260,7 +1250,6 @@ apicontroller.updatePassword = async (req, res) => {
         const newPassword = req.body.newPassword;
         const cfmPassword = req.body.confirmPassword;
         const userId = req.params.id;
-        console.log(req.body, "dsdsdsdsds")
         if (!userId) return res.status(401).json({ error: "Oops! Something went wrong. Please try again." })
         if (newPassword !== cfmPassword) throw new Error("Passwords do not match");
 
@@ -1521,7 +1510,6 @@ apicontroller.listcontact = async (req, res) => {
 
     try {
         const ContactData = await contact.find({ deleted_at: null });
-        console.log(ContactData, "contact::::::")
         res.status(200).json(ContactData)
 
     } catch (error) {
@@ -1616,7 +1604,6 @@ apicontroller.CommitteeMembers_update = async (req, res) => {
 
 
 apicontroller.aboutus = async (req, res) => {
-    console.log(req.body, 'req.body')
     try {
         const addAboutus = new aboutus({
             titleE: req.body.titleE,
@@ -1645,7 +1632,6 @@ apicontroller.listaboutus = async (req, res) => {
         } else {
 
             AboutusData = await aboutus.findOne({ deleted_at: null }).sort({ created_at: -1 });
-            console.log(AboutusData, 'AboutusData')
             return res.status(200).json({ AboutusData });
         }
 
@@ -1891,8 +1877,6 @@ apicontroller.getpaymentreceipt = async (req, res) => {
         const payment_id = 'pay_NHfxZHPhUI3Lwz';
         razorpay.payments.fetch(payment_id)
             .then((payment) => {
-                console.log("Payment Details:");
-                console.log(payment);
                 res.json(payment)
             })
             .catch((error) => {
@@ -1950,8 +1934,6 @@ apicontroller.paymentReceipt = async (req, res) => {
             },
         });
         const payment = response.data;
-        // res.render('receipt', { payment });
-        console.log("payment", payment)
         const pdfBuffer = await generateReceiptPDF(payment);
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=Receipt.pdf');
@@ -2038,7 +2020,6 @@ apicontroller.changePassword = async (req, res) => {
 apicontroller.relationship = async (req, res) => {
     try {
         const data = require('../../utils/data.json');
-        console.log(data, 'relationship')
         res.status(200).json(data.relationship)
     } catch (error) {
         console.log(error)
@@ -2311,7 +2292,6 @@ apicontroller.userroot = async (req, res) => {
 
         const childData = await user.find({ parent_id: '6585538eef8a533587fb004c', deleted_at: null });
 
-        console.log(userFound, 'userFound')
         res.status(200).json({ userFound, childData })
     } catch (error) {
         console.log(error)
@@ -2386,7 +2366,6 @@ apicontroller.userList = async (req, res) => {
     try {
         const id = req.params.id;
         const userData = await user.findOne({ deleted_at: null, _id: id },);
-        console.log(userData, "userData")
         res.status(200).json(userData)
     } catch (error) {
         console.log(error)
@@ -2816,7 +2795,6 @@ apicontroller.getPlans = async (req, res) => {
             key_id: razorpay_key_id.value,
             key_secret: razorpay_key_secret.value,
         });
-        console.log(await razorpay.plans.all())
         let plans = await Plan.aggregate([
             { $match: { deleted_at: null } },
             {
@@ -2896,7 +2874,6 @@ apicontroller.createSubscription = async (req, res) => {
         const payload = { plan_id: planId, total_count: 12, customer_notify: true, }
         const subscription = await razorpay.subscriptions.create(payload)
         const businessData = await Business.findById(businessId).select('name businessName businessEmail businessWebsite')
-        console.log(businessData, "businessData")
         let planDetail = await Plan.aggregate([
             { $match: { deleted_at: null } },
             { $match: { razorpay_plan_id: planId } },
@@ -3113,8 +3090,6 @@ apicontroller.allBusinesses = async (req, res) => {
             }
         const businesses = await Business.find(payload)
 
-        console.log(businesses, 'businesses')
-
         res.status(200).json({ businesses })
     } catch (error) {
         res.status(400).json({ error: error.message })
@@ -3211,7 +3186,6 @@ apicontroller.deleteBusiness = async (req, res) => {
     try {
         const id = req.params.id
         const businessData = await Business.findOne({ _id: id, deleted_at: null })
-        console.log(businessData, "businessData && businessData.is_recurring")
         if (businessData && businessData.is_recurring) {
             const razorpay_key_id = await Settings.findOne({ deleted_at: null, key: "razorpay_key_id" });
             const razorpay_key_secret = await Settings.findOne({ deleted_at: null, key: "razorpay_key_secret" });
@@ -3221,9 +3195,7 @@ apicontroller.deleteBusiness = async (req, res) => {
             });
 
             const subscriptionDetail = await Subscription.findOne({ deleted_at: null, business_id: id });
-            console.log(subscriptionDetail, "subscriptionDetail")
             const data = await razorpay.subscriptions.cancel(subscriptionDetail.razorpay_subscription_id);
-            console.log(data, "data")
         } else {
             await BusinessOrder.findOneAndUpdate({ business_id: id, deleted_at: null, payment_id: { $ne: null } }, { deleted_at: null })
         }

@@ -8,13 +8,14 @@ require("dotenv").config();
 const apiKey = process.env.API_KEY;
 
 const checkApiKey = (req, res, next) => {
-  const apiKeyHeader = req.headers["x-api-key"];
+  const apiKeyHeader = req.headers['x-api-key'];
   if (!apiKeyHeader || apiKeyHeader !== apiKey) {
-    res.status(403).json({ Error: "Forbidden" });
+    return res.status(403).json({ Error: 'Forbidden' });
   } else {
     next();
   }
 };
+
 apirouter.use(checkApiKey)
 const multer = require('multer');
 const storage = multer.diskStorage({
@@ -23,7 +24,6 @@ const storage = multer.diskStorage({
     cb(null, '../../uploads/');
   },
   filename: function (req, file, cb) {
-    console.log(file.originalname, "file.originalname")
     cb(null, file.originalname);
   }
 });

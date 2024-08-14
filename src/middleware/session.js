@@ -18,7 +18,6 @@ let isLogin = (req, res, next) => {
     try {
         const token = req.cookies?.token;
         if (!token || token == undefined) {
-            console.log('sadsadadsad')
             return res.redirect("/");
         }
         
