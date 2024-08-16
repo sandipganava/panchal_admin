@@ -29,11 +29,25 @@ const AdminController = {};
  * @param {Object} res - Express response object.
  */
 
+const isTokenExpired = (decodedToken) => {
+    if (!decodedToken || !decodedToken?.exp) {
+        return true;
+    }
+
+    const currentTime = Math.floor(Date.now() / 1000);
+    return decodedToken?.exp < currentTime;
+};
+
+
 AdminController.loginPage = async (req, res) => {
-    if (req.cookies?.token !== "" && req.cookies?.token !== undefined) {
-        res.redirect('/admin/index')
+
+    const token = req.cookies?.token;
+    const decodedToken = token ? jwt.decode(token) : null;
+
+    if (!token || isTokenExpired(decodedToken)) {
+        res.render('login', { failEmail: '', failPass: '' });
     } else {
-        res.render('login', { failEmail: '', failPass: '' })
+        res.redirect('/admin/index');
     }
 };
 
@@ -188,12 +202,12 @@ AdminController.editUser = async (req, res) => {
         const id = req.params.id;
         const response = await axios.get(`${baseURL}/api/user-edit/${id}`, {
             headers: { 'x-api-key': API_KEY }
-          });
+        });
         const data = response.data;
 
-        const location = await axios.get(`${baseURL}/api/locationdata`,{
+        const location = await axios.get(`${baseURL}/api/locationdata`, {
             headers: { 'x-api-key': API_KEY }
-          });
+        });
         // console.log(data, 'user data')
         res.render('pages/editUser', { userData: data, village: location.data });
     } catch (error) {
@@ -250,7 +264,7 @@ AdminController.nodeDetails = async (req, res) => {
         const id = req.params.id;
         var village;
         var userDetails;
-        const response = await axios.get(`${baseURL}/api/viewUser/${id}`,{ headers: { 'x-api-key': API_KEY } });
+        const response = await axios.get(`${baseURL}/api/viewUser/${id}`, { headers: { 'x-api-key': API_KEY } });
         const data = response.data;
 
         const formattedDate = new Date(data.User.dob).toISOString().split('T')[0];
@@ -964,7 +978,7 @@ AdminController.deleteNews = async (req, res) => {
         const id = req.params.id;
         const response = await axios.post(`${baseURL}/api/news-delete/${id}`, {}, {
             headers: { 'x-api-key': API_KEY }
-          });
+        });
         res.redirect('/news');
     } catch (error) {
         console.error("Error", error);
@@ -1059,7 +1073,7 @@ AdminController.updateFaqs = async (req, res) => {
 AdminController.deleteFaqs = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/faq-delete/${id}`, {},{ headers: { 'x-api-key': API_KEY } });
+        const response = await axios.post(`${baseURL}/api/faq-delete/${id}`, {}, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/faqs');
     } catch (error) {
         console.error("Error", error);
@@ -1184,7 +1198,7 @@ AdminController.updateSetting = async (req, res) => {
 AdminController.deleteSetting = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/deleteSetting/${id}`, {},{ headers: { 'x-api-key': API_KEY } });
+        const response = await axios.post(`${baseURL}/api/deleteSetting/${id}`, {}, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/settings');
     } catch (error) {
         console.error("Error", error);
@@ -1217,7 +1231,7 @@ AdminController.contacts = async (req, res) => {
 AdminController.deletContacts = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await axios.post(`${baseURL}/api/deleteEmailSupport/${id}`,{}, { headers: { 'x-api-key': API_KEY } });
+        const response = await axios.post(`${baseURL}/api/deleteEmailSupport/${id}`, {}, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/contacts');
     } catch (error) {
         console.error("Error", error);
@@ -1380,7 +1394,7 @@ AdminController.addTermsandcondition = async (req, res) => {
             descriptionE: req.body.descriptionE,
             descriptionG: req.body.descriptionG,
         };
-        axios.post(`${baseURL}/api/createTermsandcondition`, termsandconditionData,{ headers: { 'x-api-key': API_KEY } } );
+        axios.post(`${baseURL}/api/createTermsandcondition`, termsandconditionData, { headers: { 'x-api-key': API_KEY } });
         res.redirect('/termsandcondition')
     } catch (error) {
         console.log(error)
@@ -1485,7 +1499,7 @@ AdminController.addBusinesses = async (req, res) => {
                 contentType: "multipart/form-data",
                 'x-api-key': API_KEY,
             },
-            
+
         })
         res.redirect('/businessListing')
     } catch (error) {
